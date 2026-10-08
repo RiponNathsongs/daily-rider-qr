@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://riponnathsongs.github.io/daily-rider-qr/sitemap.xml
