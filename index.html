@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Rider ID & QR</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="brand">Daily Rider <span>ID & QR</span></div>
+      <div class="tagline">Find your daily ID quickly</div>
+    </div>
+    <a class="admin-link" href="admin.html">Admin</a>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="eyebrow">TODAY • BANGLADESH TIME</div>
+      <h1>Search your ID</h1>
+      <p>Enter the full ID or just the last 3–4 characters.</p>
+
+      <div class="search-wrap">
+        <input id="searchInput" type="search" autocomplete="off"
+          placeholder="Example: CYV or DK061026JZ4CYV">
+        <button id="clearBtn" class="ghost-btn" type="button">Clear</button>
+      </div>
+
+      <div class="public-import">
+        <div>
+          <strong>Need a QR for a new ID?</strong>
+          <small>Anyone can generate a QR here. Publicly generated IDs are not assigned to a rider.</small>
+        </div>
+        <div class="public-import-row">
+          <input id="quickId" type="text" placeholder="Enter ID">
+          <button id="generateBtn" class="primary-btn" type="button">Generate QR</button>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Today's matching IDs</h2>
+        <span id="todayLabel" class="date-pill"></span>
+      </div>
+      <div id="results" class="results"></div>
+    </section>
+  </main>
+
+  <div id="qrModal" class="modal hidden">
+    <div class="modal-card">
+      <button id="closeModal" class="modal-close">×</button>
+      <div id="modalQr" class="modal-qr"></div>
+      <div id="modalText" class="modal-text"></div>
+      <div class="zoom-row">
+        <button id="zoomOut">−</button>
+        <button id="zoomIn">+</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin • Daily Rider ID & QR</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-body">
+  <div id="loginView" class="login-page">
+    <div class="login-glow glow-one"></div>
+    <div class="login-glow glow-two"></div>
+    <div class="login-card">
+      <div class="login-logo">DR<span>QR</span></div>
+      <div class="eyebrow">PRIVATE ADMIN AREA</div>
+      <h1>Welcome back</h1>
+      <p>Sign in to manage riders and today's IDs.</p>
+      <form id="loginForm">
+        <label>Email</label>
+        <input id="email" type="email" autocomplete="username" required placeholder="Admin email">
+        <label>Password</label>
+        <input id="password" type="password" autocomplete="current-password" required placeholder="Password">
+        <button class="primary-btn full" type="submit">Secure Login</button>
+        <div id="loginError" class="error-text"></div>
+      </form>
+      <a class="back-link" href="index.html">← Back to public page</a>
+    </div>
+  </div>
+
+  <div id="dashboardView" class="hidden">
+    <header class="topbar">
+      <div>
+        <div class="brand">Admin <span>Control Center</span></div>
+        <div class="tagline">Riders • Daily IDs • QR</div>
+      </div>
+      <button id="logoutBtn" class="admin-link">Logout</button>
+    </header>
+
+    <main class="container">
+      <div class="dashboard-grid">
+        <section class="panel">
+          <div class="panel-head"><h2>Add Rider</h2></div>
+          <form id="riderForm" class="form-grid">
+            <input id="employeeId" required placeholder="Employee ID">
+            <input id="riderName" required placeholder="Rider name">
+            <button class="primary-btn" type="submit">Add Rider</button>
+          </form>
+          <div id="riderMessage" class="success-text"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h2>Add Daily ID</h2></div>
+          <form id="idForm" class="form-grid">
+            <input id="dailyId" required placeholder="Example: DK061026JZ4CYV">
+            <select id="riderSelect" required>
+              <option value="">Select rider</option>
+            </select>
+            <button class="primary-btn" type="submit">Add ID + QR</button>
+          </form>
+          <div id="idMessage" class="success-text"></div>
+        </section>
+
+        <section class="panel wide">
+          <div class="panel-head">
+            <h2>Today's IDs</h2>
+            <span id="adminDate" class="date-pill"></span>
+          </div>
+          <div id="adminIds" class="admin-list"></div>
+        </section>
+
+        <section class="panel wide">
+          <div class="panel-head"><h2>Rider Management</h2></div>
+          <div id="riderList" class="admin-list"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
