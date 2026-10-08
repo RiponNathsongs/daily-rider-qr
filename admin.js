@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, orderBy } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 import { firebaseConfig, ADMIN_EMAIL } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
@@ -70,18 +70,57 @@ function loadIds(){
 }
 document.getElementById("idForm").onsubmit=async e=>{
   e.preventDefault();
-  const code=document.getElementById("dailyId").value.trim();
+
+  const message=document.getElementById("idMessage");
+  const raw=document.getElementById("dailyId").value.trim();
   const rider=riders.find(r=>r.id===document.getElementById("riderSelect").value);
-  if(!rider) return;
-  const exists=await import("https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js").then(async m=>{
-    const s=await m.getDocs(query(collection(db,"dailyIds"),where("dateKey","==",todayKey()),where("code","==",code)));
-    return !s.empty;
-  });
-  if(exists){document.getElementById("idMessage").textContent="This ID already exists today.";return;}
-  await addDoc(collection(db,"dailyIds"),{
-    code,riderId:rider.id,riderName:rider.name,employeeId:rider.employeeId,
-    dateKey:todayKey(),createdAt:Date.now()
-  });
-  e.target.reset(); document.getElementById("idMessage").textContent="ID added successfully.";
+
+  if(!rider){
+    message.textContent="Please select a rider.";
+    return;
+  }
+
+  // Accept many IDs separated by new lines, spaces, commas, or semicolons.
+  const codes=[...new Set(raw.split(/[\s,;]+/).map(v=>v.trim()).filter(Boolean))];
+
+  if(!codes.length){
+    message.textContent="Please paste at least one ID.";
+    return;
+  }
+
+  // Read today's existing IDs once, then skip duplicates.
+  const existingSnap=await getDocs(
+    query(collection(db,"dailyIds"),where("dateKey","==",todayKey()))
+  );
+  const existingCodes=new Set(
+    existingSnap.docs.map(d=>String(d.data().code||"").trim())
+  );
+
+  const newCodes=codes.filter(code=>!existingCodes.has(code));
+
+  if(!newCodes.length){
+    message.textContent="All pasted IDs already exist today.";
+    return;
+  }
+
+  let added=0;
+  for(const code of newCodes){
+    await addDoc(collection(db,"dailyIds"),{
+      code,
+      riderId:rider.id,
+      riderName:rider.name,
+      employeeId:rider.employeeId,
+      dateKey:todayKey(),
+      createdAt:Date.now()
+    });
+    added++;
+  }
+
+  e.target.reset();
+
+  const skipped=codes.length-newCodes.length;
+  message.textContent=skipped
+    ? added+" IDs added successfully. "+skipped+" duplicate ID(s) skipped."
+    : added+" IDs added successfully.";
 };
 function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
