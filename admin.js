@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, orderBy, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 import { firebaseConfig, ADMIN_EMAIL } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
@@ -72,7 +72,7 @@ document.getElementById("idForm").onsubmit=async e=>{
   e.preventDefault();
 
   const message=document.getElementById("idMessage");
-  const raw=document.getElementById("dailyId").value.trim();
+  const raw=document.getElementById("dailyId").value;
   const rider=riders.find(r=>r.id===document.getElementById("riderSelect").value);
 
   if(!rider){
@@ -80,47 +80,70 @@ document.getElementById("idForm").onsubmit=async e=>{
     return;
   }
 
-  // Accept many IDs separated by new lines, spaces, commas, or semicolons.
-  const codes=[...new Set(raw.split(/[\s,;]+/).map(v=>v.trim()).filter(Boolean))];
+  // Google Sheets copy/paste:
+  // one ID per row. Hidden spaces/tabs around an ID are removed automatically.
+  const codes=[...new Set(
+    raw
+      .split(/\r?\n/)
+      .map(line=>line.replace(/\s+/g,"").trim())
+      .filter(Boolean)
+  )];
 
   if(!codes.length){
     message.textContent="Please paste at least one ID.";
     return;
   }
 
-  // Read today's existing IDs once, then skip duplicates.
-  const existingSnap=await getDocs(
-    query(collection(db,"dailyIds"),where("dateKey","==",todayKey()))
-  );
-  const existingCodes=new Set(
-    existingSnap.docs.map(d=>String(d.data().code||"").trim())
-  );
+  message.textContent="Adding "+codes.length+" ID(s)...";
 
-  const newCodes=codes.filter(code=>!existingCodes.has(code));
+  try{
+    // Get today's IDs once so existing IDs are skipped.
+    const existingSnap=await getDocs(
+      query(collection(db,"dailyIds"),where("dateKey","==",todayKey()))
+    );
 
-  if(!newCodes.length){
-    message.textContent="All pasted IDs already exist today.";
-    return;
+    const existingCodes=new Set(
+      existingSnap.docs.map(d=>String(d.data().code||"").replace(/\s+/g,"").trim())
+    );
+
+    const newCodes=codes.filter(code=>!existingCodes.has(code));
+
+    if(!newCodes.length){
+      message.textContent="All pasted IDs already exist today.";
+      return;
+    }
+
+    // Firestore allows up to 500 writes per batch.
+    // This automatically handles more than 500 pasted IDs too.
+    for(let i=0;i<newCodes.length;i+=500){
+      const chunk=newCodes.slice(i,i+500);
+      const batch=writeBatch(db);
+
+      chunk.forEach(code=>{
+        const ref=doc(collection(db,"dailyIds"));
+        batch.set(ref,{
+          code,
+          riderId:rider.id,
+          riderName:rider.name,
+          employeeId:rider.employeeId,
+          dateKey:todayKey(),
+          createdAt:Date.now()
+        });
+      });
+
+      await batch.commit();
+    }
+
+    e.target.reset();
+
+    const skipped=codes.length-newCodes.length;
+    message.textContent=skipped
+      ? newCodes.length+" IDs added successfully. "+skipped+" duplicate ID(s) skipped."
+      : newCodes.length+" IDs added successfully.";
+
+  }catch(err){
+    console.error("Bulk ID import error:",err);
+    message.textContent="Could not add IDs: "+(err.code || err.message || "Unknown error");
   }
-
-  let added=0;
-  for(const code of newCodes){
-    await addDoc(collection(db,"dailyIds"),{
-      code,
-      riderId:rider.id,
-      riderName:rider.name,
-      employeeId:rider.employeeId,
-      dateKey:todayKey(),
-      createdAt:Date.now()
-    });
-    added++;
-  }
-
-  e.target.reset();
-
-  const skipped=codes.length-newCodes.length;
-  message.textContent=skipped
-    ? added+" IDs added successfully. "+skipped+" duplicate ID(s) skipped."
-    : added+" IDs added successfully.";
 };
 function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
