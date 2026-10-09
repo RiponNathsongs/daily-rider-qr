@@ -46,3 +46,11 @@ button,input,select,textarea{font:inherit}
 .form-grid{display:grid;gap:10px}.admin-list{display:grid;gap:10px}.admin-item{padding:13px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.03);display:flex;justify-content:space-between;gap:10px;align-items:center}.admin-item small{color:var(--muted);display:block;margin-top:3px}.danger-btn{background:rgba(255,102,133,.1);border:1px solid rgba(255,102,133,.25);color:#ff91a6;padding:8px 10px;border-radius:10px;cursor:pointer}.success-text{color:var(--success);font-size:13px;margin-top:10px}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.78);display:grid;place-items:center;z-index:30;padding:20px}.modal-card{background:#0c1b2f;border:1px solid var(--line);border-radius:24px;padding:25px;text-align:center;position:relative;max-width:90vw}.modal-close{position:absolute;right:10px;top:8px;border:0;background:transparent;color:white;font-size:30px;cursor:pointer}.modal-qr{background:white;padding:15px;border-radius:15px;display:inline-block;transform-origin:center}.modal-text{margin-top:14px;font-weight:800;word-break:break-all}.zoom-row{display:flex;justify-content:center;gap:10px;margin-top:15px}.zoom-row button{width:48px;height:40px;border-radius:10px;border:1px solid var(--line);background:#10243c;color:white;font-size:22px;cursor:pointer}
 @media(max-width:760px){.dashboard-grid{grid-template-columns:1fr}.wide{grid-column:auto}.result-card{grid-template-columns:1fr}.qr-box{max-width:180px;margin:auto}.public-import-row{flex-direction:column}.search-wrap{flex-direction:column}.topbar{padding:0 4%}.container{width:94%}}
+
+.seo-info{margin-top:34px;padding:24px;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.025);color:var(--muted);line-height:1.75}
+.seo-info h2,.seo-info h3{color:var(--text);line-height:1.35}
+.seo-info h2{font-size:clamp(21px,3vw,28px);margin:0 0 12px}
+.seo-info h3{font-size:18px;margin:22px 0 8px}
+.seo-info p{margin:10px 0}
+.seo-info ul{padding-left:22px;margin:8px 0}
+.seo-info li{margin:6px 0}
