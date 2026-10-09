@@ -1,6 +1,10 @@
 # Daily Rider ID & QR
 
-This is the starter project for a GitHub Pages + Firebase version.
+Free online tool to search today’s rider IDs in Bangladesh and generate QR codes for IDs. Search by the complete ID or the last 3–4 characters.
+
+**Live website:** https://riponnathsongs.github.io/daily-rider-qr/
+
+The daily view follows Bangladesh time (Asia/Dhaka).
 
 ## Main behavior
 
