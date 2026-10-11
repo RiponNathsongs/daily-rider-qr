@@ -36,10 +36,10 @@ function loadRiders(){
   onSnapshot(query(collection(db,"riders"),orderBy("name")),snap=>{
     riders=snap.docs.map(d=>({id:d.id,...d.data()}));
     document.getElementById("riderSelect").innerHTML='<option value="">Select rider</option>'+
-      riders.filter(r=>r.active!==false).map(r=>`<option value="${r.id}">${esc(r.name)} — ${esc(r.employeeId)}</option>`).join("");
+      riders.filter(r=>r.active!==false).map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join("");
     document.getElementById("riderList").innerHTML=riders.map(r=>`
       <div class="admin-item">
-        <div><b>${esc(r.name)}</b><small>${esc(r.employeeId)} • ${r.active===false?"Inactive":"Active"}</small></div>
+        <div><b>${esc(r.name)}</b><small>${r.active===false?"Inactive":"Active"}</small></div>
         <button class="danger-btn" data-del-rider="${r.id}">Remove</button>
       </div>`).join("") || '<div class="empty">No riders yet.</div>';
     document.querySelectorAll("[data-del-rider]").forEach(b=>b.onclick=async()=>{
@@ -49,9 +49,8 @@ function loadRiders(){
 }
 document.getElementById("riderForm").onsubmit=async e=>{
   e.preventDefault();
-  const employeeId=document.getElementById("employeeId").value.trim();
   const name=document.getElementById("riderName").value.trim();
-  await addDoc(collection(db,"riders"),{employeeId,name,active:true,createdAt:Date.now()});
+  await addDoc(collection(db,"riders"),{name,active:true,createdAt:Date.now()});
   e.target.reset(); document.getElementById("riderMessage").textContent="Rider added successfully.";
 };
 
@@ -60,7 +59,7 @@ function loadIds(){
     const rows=snap.docs.map(d=>({id:d.id,...d.data()}));
     document.getElementById("adminIds").innerHTML=rows.map(r=>`
       <div class="admin-item">
-        <div><b>${esc(r.code)}</b><small>${esc(r.riderName)} • ${esc(r.employeeId)}</small></div>
+        <div><b>${esc(r.code)}</b><small>${esc(r.riderName || "Unassigned")}</small></div>
         <button class="danger-btn" data-del-id="${r.id}">Delete</button>
       </div>`).join("") || '<div class="empty">No IDs added today.</div>';
     document.querySelectorAll("[data-del-id]").forEach(b=>b.onclick=async()=>{
@@ -125,7 +124,6 @@ document.getElementById("idForm").onsubmit=async e=>{
           code,
           riderId:rider.id,
           riderName:rider.name,
-          employeeId:rider.employeeId,
           dateKey:todayKey(),
           createdAt:Date.now()
         });
