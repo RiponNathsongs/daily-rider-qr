@@ -37,8 +37,7 @@ function render() {
   const term = searchInput.value.trim().toLowerCase();
   const found = !term ? records : records.filter(x =>
     String(x.code).toLowerCase().includes(term) ||
-    String(x.riderName || "").toLowerCase().includes(term) ||
-    String(x.employeeId || "").toLowerCase().includes(term)
+    String(x.riderName || "").toLowerCase().includes(term)
   );
   if (!found.length) {
     results.innerHTML = `<div class="empty">${term ? "No matching ID found." : "No IDs available for today."}</div>`;
@@ -50,7 +49,6 @@ function render() {
         <div class="eyebrow">DAILY ID</div>
         <div class="id">${escapeHtml(r.code)}</div>
         <div class="meta">Rider: <b>${escapeHtml(r.riderName || "Unassigned")}</b></div>
-        <div class="meta">Employee ID: <b>${escapeHtml(r.employeeId || "—")}</b></div>
         <div class="card-actions">
           <button data-copy="${escapeAttr(r.code)}">Copy ID</button>
           <button data-qr="${i}">Zoom QR</button>
