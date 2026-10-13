@@ -231,3 +231,78 @@ body.light-mode .about-dropdown .about-card-footer{color:#607087}
   .login-page{padding:58px 18px 22px}
   .admin-header-actions .theme-toggle,.admin-header-actions .admin-link{padding:9px 10px;font-size:11px}
 }
+
+
+/* Final admin login glass + high-contrast theme overrides */
+.admin-body .login-page{
+  background:
+    radial-gradient(ellipse at 18% 16%,rgba(66,217,255,.18),transparent 38%),
+    radial-gradient(ellipse at 82% 80%,rgba(77,124,255,.20),transparent 40%);
+}
+.admin-body .login-card{
+  background:linear-gradient(135deg,rgba(17,39,61,.48),rgba(7,19,34,.38)) !important;
+  border:1px solid rgba(255,255,255,.32) !important;
+  box-shadow:0 26px 80px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.30),inset 0 0 36px rgba(66,217,255,.08) !important;
+  backdrop-filter:blur(32px) saturate(175%) !important;
+  -webkit-backdrop-filter:blur(32px) saturate(175%) !important;
+}
+.admin-body:not(.light-mode) .login-card h1,
+.admin-body:not(.light-mode) .login-card .login-logo{color:#f4f9ff}
+.admin-body:not(.light-mode) .login-card p{color:#c1d3e5}
+.admin-body:not(.light-mode) .login-card label{color:#c7d9e9}
+.admin-body:not(.light-mode) .login-card .back-link{color:#a9bfd3}
+.admin-body .login-card input{
+  background:rgba(245,250,255,.94) !important;
+  color:#142235 !important;
+  border:1px solid rgba(255,255,255,.72) !important;
+  box-shadow:0 4px 15px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.95) !important;
+}
+.admin-body .login-card input::placeholder{color:#66788b !important}
+.admin-body .login-card input:focus{
+  border-color:#22bfe9 !important;
+  box-shadow:0 0 0 3px rgba(34,191,233,.20) !important;
+}
+.admin-body.light-mode{
+  --bg:#edf4fb;--bg2:#e2ecf7;--card:rgba(255,255,255,.72);--card2:#fff;
+  --text:#142235;--muted:#53677d;--cyan:#087eaa;--blue:#4168d7;
+  --line:rgba(25,48,74,.16);--danger:#b42345;--success:#11794b;
+  --shadow:0 16px 42px rgba(31,58,87,.10);
+  background:
+    radial-gradient(ellipse at 12% 10%,rgba(57,190,220,.24),transparent 38%),
+    radial-gradient(ellipse at 88% 82%,rgba(91,122,231,.19),transparent 42%),
+    linear-gradient(135deg,#f8fbff,#eaf1fb) !important;
+  color:#142235 !important;
+}
+.admin-body.light-mode .login-card{
+  background:linear-gradient(135deg,rgba(255,255,255,.62),rgba(239,247,255,.40)) !important;
+  border:1px solid rgba(255,255,255,.88) !important;
+  box-shadow:0 28px 75px rgba(41,65,95,.18),inset 0 1px 0 rgba(255,255,255,.98),inset 0 0 34px rgba(255,255,255,.32) !important;
+  backdrop-filter:blur(34px) saturate(180%) !important;
+  -webkit-backdrop-filter:blur(34px) saturate(180%) !important;
+}
+.admin-body.light-mode .login-card h1,
+.admin-body.light-mode .login-card .login-logo{color:#12243a !important}
+.admin-body.light-mode .login-card p{color:#42566d !important}
+.admin-body.light-mode .login-card label{color:#344b62 !important}
+.admin-body.light-mode .login-card .back-link{color:#52677d !important}
+.admin-body.light-mode .login-card .eyebrow{color:#007ba5 !important}
+.admin-body.light-mode .primary-btn{color:#071b2b}
+.admin-body.light-mode #dashboardView{color:#142235}
+.admin-body.light-mode .topbar{background:rgba(255,255,255,.76);border-color:rgba(25,48,74,.13)}
+.admin-body.light-mode .tagline{color:#53677d}
+.admin-body.light-mode .panel{background:rgba(255,255,255,.72);border-color:rgba(25,48,74,.14);color:#142235}
+.admin-body.light-mode .panel h2{color:#142235}
+.admin-body.light-mode .admin-item{background:rgba(255,255,255,.68);color:#142235;border-color:rgba(25,48,74,.14)}
+.admin-body.light-mode .admin-item small{color:#53677d}
+.admin-body.light-mode .form-grid input,
+.admin-body.light-mode .form-grid select,
+.admin-body.light-mode .form-grid textarea{background:rgba(255,255,255,.92);color:#142235;border-color:rgba(25,48,74,.2)}
+.admin-body.light-mode .form-grid input::placeholder,
+.admin-body.light-mode .form-grid textarea::placeholder{color:#687b8e}
+.admin-body.light-mode .date-pill{color:#087eaa}
+.admin-body.light-mode .admin-link{color:#142235;background:rgba(255,255,255,.72);border-color:rgba(8,126,170,.26)}
+.admin-body.light-mode .theme-toggle{color:#142235;background:rgba(255,255,255,.76);border-color:rgba(25,48,74,.17)}
+@media(prefers-reduced-transparency:reduce){
+  .admin-body .login-card,.admin-body.light-mode .login-card{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(14,31,49,.96)!important}
+  .admin-body.light-mode .login-card{background:rgba(255,255,255,.96)!important}
+}
