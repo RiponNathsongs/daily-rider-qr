@@ -11,6 +11,7 @@
 </head>
 <body class="admin-body">
   <div id="loginView" class="login-page">
+    <button id="loginThemeToggle" class="theme-toggle admin-theme-toggle" type="button" aria-pressed="false">☀️ White Mode</button>
     <div class="login-glow glow-one"></div>
     <div class="login-glow glow-two"></div>
     <div class="login-card">
@@ -36,7 +37,10 @@
         <div class="brand">Admin <span>Control Center</span></div>
         <div class="tagline">Riders • Daily IDs • QR</div>
       </div>
-      <button id="logoutBtn" class="admin-link">Logout</button>
+      <div class="admin-header-actions">
+        <button id="dashboardThemeToggle" class="theme-toggle" type="button" aria-pressed="false">☀️ White Mode</button>
+        <button id="logoutBtn" class="admin-link">Logout</button>
+      </div>
     </header>
 
     <main class="container">
@@ -78,6 +82,26 @@
     </main>
   </div>
 
+  <script>
+    (() => {
+      const buttons = [document.getElementById("loginThemeToggle"), document.getElementById("dashboardThemeToggle")].filter(Boolean);
+      const applyTheme = light => {
+        document.body.classList.toggle("light-mode", light);
+        buttons.forEach(button => {
+          button.textContent = light ? "🌙 Black Mode" : "☀️ White Mode";
+          button.setAttribute("aria-pressed", String(light));
+        });
+      };
+      let saved = null;
+      try { saved = localStorage.getItem("drqr-theme"); } catch (_) {}
+      applyTheme(saved === "light");
+      buttons.forEach(button => button.addEventListener("click", () => {
+        const light = !document.body.classList.contains("light-mode");
+        applyTheme(light);
+        try { localStorage.setItem("drqr-theme", light ? "light" : "dark"); } catch (_) {}
+      }));
+    })();
+  </script>
   <script type="module" src="admin.js"></script>
 </body>
 </html>
