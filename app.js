@@ -161,3 +161,25 @@ function escapeHtml(v) {
 function escapeAttr(v) {
   return escapeHtml(v).replace(/`/g, "&#096;");
 }
+
+
+// Accessible light/dark theme toggle. Preference is stored only in this browser.
+const themeToggle = document.getElementById("themeToggle");
+function applyTheme(isLight) {
+  document.body.classList.toggle("light-mode", isLight);
+  if (themeToggle) {
+    themeToggle.textContent = isLight ? "🌙 Black Mode" : "☀️ White Mode";
+    themeToggle.setAttribute("aria-pressed", String(isLight));
+    themeToggle.setAttribute("aria-label", isLight ? "Switch to black mode" : "Switch to white mode");
+  }
+}
+let savedTheme = null;
+try { savedTheme = localStorage.getItem("drqr-theme"); } catch (_) {}
+applyTheme(savedTheme === "light");
+if (themeToggle) {
+  themeToggle.addEventListener("click", () => {
+    const isLight = !document.body.classList.contains("light-mode");
+    applyTheme(isLight);
+    try { localStorage.setItem("drqr-theme", isLight ? "light" : "dark"); } catch (_) {}
+  });
+}
