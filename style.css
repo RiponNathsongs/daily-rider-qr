@@ -160,3 +160,27 @@ button,input,select,textarea{font:inherit}
   .about-dropdown .about-detail{grid-template-columns:20px 52px minmax(0,1fr);gap:6px;font-size:11px}
 }
 @media(prefers-reduced-motion:reduce){.about-dropdown{animation:none}.about-chevron,.about-dropdown .about-close,.about-dropdown .about-socials a{transition:none}}
+
+
+/* DRQR public page light/dark mode toggle */
+.theme-toggle{border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--text);padding:10px 13px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:750;white-space:nowrap}
+.theme-toggle:hover{border-color:var(--cyan);background:rgba(66,217,255,.12)}
+body.light-mode{--bg:#f4f7fb;--bg2:#e8eef6;--card:rgba(255,255,255,.94);--card2:#fff;--text:#172437;--muted:#607087;--cyan:#087eaa;--blue:#4168d7;--line:rgba(22,42,66,.15);--danger:#c6284d;--success:#137a4b;--shadow:0 12px 32px rgba(30,55,80,.10);background:radial-gradient(circle at 15% 0%,rgba(66,217,255,.13),transparent 30%),radial-gradient(circle at 85% 15%,rgba(77,124,255,.10),transparent 30%),var(--bg);color:var(--text)}
+body.light-mode .topbar{background:rgba(255,255,255,.9)}
+body.light-mode .search-wrap{background:rgba(255,255,255,.8)}
+body.light-mode .search-wrap input{color:var(--text)}
+body.light-mode .search-wrap input::placeholder{color:#8795a7}
+body.light-mode .public-import{background:rgba(255,255,255,.82)}
+body.light-mode .public-import-row input,body.light-mode .form-grid input,body.light-mode .form-grid select,body.light-mode .form-grid textarea,body.light-mode .login-card input{background:#fff;color:#172437;border-color:rgba(22,42,66,.18)}
+body.light-mode .ghost-btn{background:#fff;color:var(--text)}
+body.light-mode .card-actions button,body.light-mode .zoom-row button{background:#edf3fa;color:#172437;border-color:rgba(22,42,66,.15)}
+body.light-mode .modal-card{background:#fff;color:#172437}
+body.light-mode .modal-close{color:#172437}
+body.light-mode .seo-info{background:rgba(255,255,255,.8)}
+body.light-mode .about-dropdown .about-card{background:linear-gradient(145deg,#fff,#f0f5fb);color:#172437;border-color:rgba(22,42,66,.13)}
+body.light-mode .about-dropdown .about-card-topline{color:#607087}
+body.light-mode .about-dropdown .about-heading h2,body.light-mode .about-dropdown .about-role,body.light-mode .about-dropdown .about-bio,body.light-mode .about-dropdown .about-detail a,body.light-mode .about-dropdown .about-detail strong{color:#172437}
+body.light-mode .about-dropdown .about-bio{background:#f3f7fb;border-color:rgba(22,42,66,.1)}
+body.light-mode .about-dropdown .about-socials a{background:#f3f7fb;color:#172437;border-color:rgba(22,42,66,.12)}
+body.light-mode .about-dropdown .about-card-footer{color:#607087}
+@media(max-width:520px){.topbar-actions{flex-wrap:wrap;justify-content:flex-end}.theme-toggle{padding:9px 10px;font-size:11px}}
