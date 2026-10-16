@@ -47,7 +47,7 @@
   }
   </script>
   <link rel="icon" type="image/svg+xml" href="favicon-public.svg">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261016-aboutfix">
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-RF9NTH2KFB"></script>
   <script>
@@ -187,27 +187,36 @@
     (() => {
       const panel = document.getElementById('aboutMeModal');
       const openBtn = document.getElementById('aboutMeBtn');
-      const closeBtn = panel?.querySelector('[data-window-action="close"]');
       const wrap = document.querySelector('.about-menu-wrap');
-      if (!panel || !openBtn || !closeBtn || !wrap) return;
+      if (!panel || !openBtn || !wrap) return;
       const closePanel = () => {
         panel.classList.add('hidden');
+        panel.classList.remove('mac-maximized');
         openBtn.setAttribute('aria-expanded', 'false');
       };
       openBtn.addEventListener('click', (event) => {
+        event.preventDefault();
         event.stopPropagation();
         const shouldOpen = panel.classList.contains('hidden');
-        panel.classList.toggle('hidden', !shouldOpen);
-        openBtn.setAttribute('aria-expanded', String(shouldOpen));
+        if (shouldOpen) {
+          panel.classList.remove('hidden');
+          panel.classList.remove('mac-maximized');
+          openBtn.setAttribute('aria-expanded', 'true');
+        } else {
+          closePanel();
+        }
       });
-      closeBtn.addEventListener('click', closePanel);
-      panel.querySelectorAll('[data-window-action="minimize"]').forEach(control => control.addEventListener('click', closePanel));
-      panel.querySelectorAll('[data-window-action="maximize"]').forEach(control => control.addEventListener('click', () => panel.classList.toggle('mac-maximized')));
-      panel.addEventListener('click', (event) => event.stopPropagation());
-      document.addEventListener('click', (event) => {
+      panel.querySelectorAll('[data-window-action="close"], [data-window-action="minimize"]').forEach(control => {
+        control.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); closePanel(); });
+      });
+      panel.querySelectorAll('[data-window-action="maximize"]').forEach(control => {
+        control.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); panel.classList.toggle('mac-maximized'); });
+      });
+      panel.addEventListener('click', event => event.stopPropagation());
+      document.addEventListener('click', event => {
         if (!wrap.contains(event.target)) closePanel();
       });
-      document.addEventListener('keydown', (event) => {
+      document.addEventListener('keydown', event => {
         if (event.key === 'Escape') closePanel();
       });
     })();
