@@ -107,6 +107,11 @@
       <h1>DRQR – Daily Rider ID Search &amp; QR Code Generator</h1>
       <p>Find today’s rider ID in Bangladesh by entering the full ID or its last 3–4 characters. You can also generate a QR code for an ID online for free.</p>
 
+      <section class="stats-grid" aria-label="DRQR lifetime statistics">
+        <article class="stat-card"><div class="stat-icon">▦</div><div class="stat-label">Total QR Submitted</div><div class="stat-number" id="totalSubmitted">—</div><div class="stat-note">IDs added through Admin</div></article>
+        <article class="stat-card"><div class="stat-icon">⌗</div><div class="stat-label">Total QR Generated</div><div class="stat-number" id="totalGenerated">—</div><div class="stat-note">Lifetime ID records stored</div></article>
+      </section>
+
       <div class="search-wrap">
         <input id="searchInput" type="search" autocomplete="off"
           placeholder="Example: CYV or DK061026JZ4CYV">
@@ -198,6 +203,6 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-  <script type="module" src="app.js?v=20261013-1"></script>
+  <script type="module" src="app.js?v=20261016-stats1"></script>
 </body>
 </html>
