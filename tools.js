@@ -4,12 +4,13 @@
   // When a tool is selected from the homepage menu, show only that tool.
   // Opening tools.html without a valid tool hash keeps the full dashboard.
   const toolPanels = [...document.querySelectorAll('.tool-panel')];
-  const selectedTool = decodeURIComponent(location.hash.slice(1));
+  const selectedTool = new URLSearchParams(location.search).get('tool') || decodeURIComponent(location.hash.slice(1));
   const validTool = toolPanels.find(panel => panel.id === selectedTool);
   if (validTool) {
     toolPanels.forEach(panel => {
       panel.hidden = panel !== validTool;
-      panel.style.display = panel === validTool ? '' : 'none';
+      panel.classList.toggle('hidden', panel !== validTool);
+      panel.style.setProperty('display', panel === validTool ? '' : 'none', 'important');
     });
     const introTitle = document.querySelector('.tools-intro h1');
     const introText = document.querySelector('.tools-intro p');
