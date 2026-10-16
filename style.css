@@ -549,3 +549,40 @@ body.light-mode .stats-dropdown .stat-note{color:#687f94}
   animation-timing-function:cubic-bezier(.16,1,.3,1);
 }
 .mac-dot{transition:filter .2s ease,transform .2s ease}
+
+
+/* DRQR Tools navigation and dashboard */
+.tools-link{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(66,217,255,.35);background:linear-gradient(135deg,rgba(66,217,255,.14),rgba(77,124,255,.12));color:var(--text);padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:750;white-space:nowrap;transition:transform .2s ease,border-color .2s ease}
+.tools-link:hover{transform:translateY(-1px);border-color:var(--cyan)}
+.tools-page .topbar{gap:14px}
+.tools-page .topbar-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.tools-page .tools-container{width:min(1120px,92%);margin:0 auto;padding:34px 0 70px}
+.tools-intro{text-align:center;padding:26px 0 30px}
+.tools-intro h1{font-size:clamp(32px,5vw,48px);margin:10px 0}
+.tools-intro p{color:var(--muted);max-width:720px;margin:0 auto;line-height:1.7}
+.tools-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.tool-panel{min-width:0;padding:22px;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);backdrop-filter:blur(12px)}
+.tool-panel h2{margin:0 0 8px;font-size:19px}
+.tool-description{color:var(--muted);font-size:13px;line-height:1.6;margin:0 0 17px}
+.tool-panel label{display:block;color:var(--muted);font-size:12px;font-weight:700;margin:10px 0 6px}
+.tool-panel input,.tool-panel textarea,.tool-panel select{width:100%;min-width:0;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:rgba(3,13,25,.65);color:var(--text);outline:none}
+.tool-panel textarea{resize:vertical;min-height:90px}
+.tool-panel input:focus,.tool-panel textarea:focus,.tool-panel select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(66,217,255,.1)}
+.tool-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px}
+.tool-actions button,.tool-btn{border:1px solid var(--line);border-radius:11px;padding:10px 14px;background:rgba(66,217,255,.10);color:var(--text);font-weight:750;cursor:pointer}
+.tool-actions .primary-btn,.tool-btn.primary-btn{color:#06101d}
+.tool-output{margin-top:14px;padding:12px;border:1px dashed var(--line);border-radius:12px;overflow-wrap:anywhere;white-space:pre-wrap;color:var(--text);min-height:44px}
+.tool-output:empty{display:none}
+.tool-output.success{border-color:rgba(93,224,162,.45)}
+.tool-output.error{border-color:rgba(255,102,133,.5);color:var(--danger)}
+.tool-two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tool-preview{display:flex;align-items:center;justify-content:center;min-height:100px;padding:12px;background:rgba(255,255,255,.96);border-radius:12px;overflow:auto}
+.tool-preview canvas,.tool-preview img{max-width:100%;height:auto}
+#scannerVideo{display:block;width:100%;max-height:260px;object-fit:cover;border-radius:12px;background:#02060b;margin-top:12px}
+#barcodePreview svg{max-width:100%;height:auto}
+.tool-muted{font-size:12px;color:var(--muted);line-height:1.6}
+.tools-footer{text-align:center;color:var(--muted);font-size:12px;margin-top:28px}
+body.light-mode .tool-panel input,body.light-mode .tool-panel textarea,body.light-mode .tool-panel select{background:rgba(255,255,255,.9);color:#142235;border-color:rgba(25,48,74,.2)}
+body.light-mode .tool-output{color:#142235}
+@media(max-width:760px){.tools-grid{grid-template-columns:1fr}.tools-page .topbar{height:auto;min-height:76px;padding:12px 4%;align-items:flex-start}.tools-page .topbar-actions{gap:7px}.tools-link,.admin-link,.theme-toggle{padding:9px 10px;font-size:12px}}
+@media(max-width:440px){.tools-page .topbar{flex-direction:column;gap:10px}.tools-page .topbar-actions{width:100%;justify-content:flex-start}.tools-container{padding-top:20px}.tool-panel{padding:17px}.tool-two-col{grid-template-columns:1fr}}
