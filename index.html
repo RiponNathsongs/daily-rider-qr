@@ -201,6 +201,8 @@
         openBtn.setAttribute('aria-expanded', String(shouldOpen));
       });
       closeBtn.addEventListener('click', closePanel);
+      panel.querySelectorAll('[data-window-action="minimize"]').forEach(control => control.addEventListener('click', closePanel));
+      panel.querySelectorAll('[data-window-action="maximize"]').forEach(control => control.addEventListener('click', () => panel.classList.toggle('mac-maximized')));
       panel.addEventListener('click', (event) => event.stopPropagation());
       document.addEventListener('click', (event) => {
         if (!wrap.contains(event.target)) closePanel();
@@ -227,6 +229,8 @@
         btn.setAttribute('aria-expanded', String(open));
       });
       closeBtn.addEventListener('click', closePanel);
+      panel.querySelectorAll('[data-window-action="minimize"]').forEach(control => control.addEventListener('click', closePanel));
+      panel.querySelectorAll('[data-window-action="maximize"]').forEach(control => control.addEventListener('click', () => panel.classList.toggle('mac-maximized')));
       panel.addEventListener('click', event => event.stopPropagation());
       document.addEventListener('click', event => { if (!wrap.contains(event.target)) closePanel(); });
       document.addEventListener('keydown', event => { if (event.key === 'Escape') closePanel(); });
