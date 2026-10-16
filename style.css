@@ -413,3 +413,20 @@ body.light-mode .stats-dropdown .stat-note{color:#687f94}
   .stats-dropdown .stat-number{font-size:27px}
   .stats-dropdown .stat-note{font-size:9px}
 }
+
+
+/* Keep the Statistics dropdown compact without inner scrollbars */
+.stats-dropdown{
+  max-height:none;
+  overflow:visible;
+}
+.stats-dropdown .stats-popup-card{
+  max-height:none;
+  overflow:visible;
+}
+@media(max-width:520px){
+  .stats-dropdown{
+    max-height:none;
+    overflow:visible;
+  }
+}
