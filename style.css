@@ -430,3 +430,37 @@ body.light-mode .stats-dropdown .stat-note{color:#687f94}
     overflow:visible;
   }
 }
+
+
+/* Final fix: prevent horizontal overflow/scrollbar in Statistics popup */
+.stats-dropdown{
+  box-sizing:border-box;
+  width:min(460px,calc(100vw - 28px));
+  overflow-x:hidden !important;
+  overflow-y:visible !important;
+}
+.stats-dropdown .stats-popup-card{
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  overflow-x:hidden !important;
+}
+.stats-dropdown .stats-grid{
+  width:100%;
+  min-width:0;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.stats-dropdown .stat-card{
+  min-width:0;
+  max-width:100%;
+}
+.stats-dropdown .stat-label,
+.stats-dropdown .stat-note{
+  overflow-wrap:anywhere;
+}
+@media(max-width:520px){
+  .stats-dropdown{
+    width:min(420px,calc(100vw - 20px));
+    right:-50px;
+  }
+}
