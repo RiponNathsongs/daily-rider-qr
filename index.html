@@ -102,7 +102,7 @@
         <div id="statsDropdown" class="about-dropdown stats-dropdown hidden" role="region" aria-label="Lifetime statistics">
           <section class="about-card stats-popup-card">
             <div class="about-glass-glow" aria-hidden="true"></div>
-            <div class="about-card-topline"><span class="about-status-dot"></span> DRQR LIFETIME STATISTICS <button id="closeStats" class="about-close" type="button" aria-label="Close statistics">×</button></div>
+            <div class="about-card-topline mac-window-bar"><span class="mac-window-controls"><button class="mac-dot mac-close" type="button" aria-label="Close Statistics" data-window-action="close"></button><button class="mac-dot mac-minimize" type="button" aria-label="Minimize Statistics" data-window-action="minimize"></button><button class="mac-dot mac-maximize" type="button" aria-label="Maximize Statistics" data-window-action="maximize"></button></span><span class="mac-window-title">DRQR — Statistics</span><span class="about-status-dot"></span></div>
             <div class="stats-grid">
               <article class="stat-card"><div class="stat-icon">▦</div><div class="stat-label">Total QR Submitted</div><div class="stat-number" id="totalSubmitted">—</div><div class="stat-note">IDs added through Admin</div></article>
               <article class="stat-card"><div class="stat-icon">⌗</div><div class="stat-label">Total QR Generated</div><div class="stat-number" id="totalGenerated">—</div><div class="stat-note">Lifetime ID records stored</div></article>
@@ -187,7 +187,7 @@
     (() => {
       const panel = document.getElementById('aboutMeModal');
       const openBtn = document.getElementById('aboutMeBtn');
-      const closeBtn = document.getElementById('closeAboutMe');
+      const closeBtn = panel?.querySelector('[data-window-action="close"]');
       const wrap = document.querySelector('.about-menu-wrap');
       if (!panel || !openBtn || !closeBtn || !wrap) return;
       const closePanel = () => {
@@ -216,7 +216,7 @@
     (() => {
       const panel = document.getElementById('statsDropdown');
       const btn = document.getElementById('statsBtn');
-      const closeBtn = document.getElementById('closeStats');
+      const closeBtn = panel?.querySelector('[data-window-action="close"]');
       const wrap = document.querySelector('.stats-menu-wrap');
       if (!panel || !btn || !closeBtn || !wrap) return;
       const closePanel = () => { panel.classList.add('hidden'); btn.setAttribute('aria-expanded','false'); };
