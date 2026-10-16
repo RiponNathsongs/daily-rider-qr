@@ -1,5 +1,27 @@
 (() => {
   const $ = id => document.getElementById(id);
+
+  // When a tool is selected from the homepage menu, show only that tool.
+  // Opening tools.html without a valid tool hash keeps the full dashboard.
+  const toolPanels = [...document.querySelectorAll('.tool-panel')];
+  const selectedTool = decodeURIComponent(location.hash.slice(1));
+  const validTool = toolPanels.find(panel => panel.id === selectedTool);
+  if (validTool) {
+    toolPanels.forEach(panel => {
+      panel.hidden = panel !== validTool;
+      panel.style.display = panel === validTool ? '' : 'none';
+    });
+    const introTitle = document.querySelector('.tools-intro h1');
+    const introText = document.querySelector('.tools-intro p');
+    if (introTitle) introTitle.textContent = validTool.querySelector('h2')?.textContent || 'Selected Tool';
+    if (introText) introText.textContent = 'Use this tool below. Open the full dashboard to choose another tool.';
+    const allToolsLink = document.createElement('a');
+    allToolsLink.className = 'tools-link';
+    allToolsLink.href = 'tools.html';
+    allToolsLink.textContent = '← All tools';
+    allToolsLink.setAttribute('aria-label', 'Back to all tools');
+    document.querySelector('.topbar-actions')?.prepend(allToolsLink);
+  }
   const setMessage = (id, message, type = '') => {
     const el = $(id); if (!el) return;
     el.textContent = message; el.className = 'tool-output' + (type ? ' ' + type : '');
