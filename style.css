@@ -613,3 +613,10 @@ body.light-mode .tools-dropdown .tools-menu-list small{color:#53677d}
  .tools-menu-list a{padding:8px;gap:8px}
  .tools-menu-icon{width:34px;height:34px;flex-basis:34px}
 }
+
+
+/* Statistics cards: stronger text contrast in dark mode */
+body:not(.light-mode) .stats-dropdown .stat-label{color:#e1f1ff !important;text-shadow:0 1px 2px rgba(0,0,0,.28)}
+body:not(.light-mode) .stats-dropdown .stat-note{color:#b4c9dc !important}
+body:not(.light-mode) .stats-dropdown .about-card-topline,
+body:not(.light-mode) .stats-dropdown .mac-window-title{color:#c0d7e9 !important}
