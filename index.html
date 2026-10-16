@@ -97,6 +97,20 @@
           </section>
         </div>
       </div>
+      <div class="stats-menu-wrap">
+        <button id="statsBtn" class="about-trigger stats-trigger" type="button" aria-haspopup="true" aria-controls="statsDropdown" aria-expanded="false"><span aria-hidden="true">📊</span> Statistics <span class="about-chevron" aria-hidden="true">⌄</span></button>
+        <div id="statsDropdown" class="about-dropdown stats-dropdown hidden" role="region" aria-label="Lifetime statistics">
+          <section class="about-card stats-popup-card">
+            <div class="about-glass-glow" aria-hidden="true"></div>
+            <div class="about-card-topline"><span class="about-status-dot"></span> DRQR LIFETIME STATISTICS <button id="closeStats" class="about-close" type="button" aria-label="Close statistics">×</button></div>
+            <div class="stats-grid">
+              <article class="stat-card"><div class="stat-icon">▦</div><div class="stat-label">Total QR Submitted</div><div class="stat-number" id="totalSubmitted">—</div><div class="stat-note">IDs added through Admin</div></article>
+              <article class="stat-card"><div class="stat-icon">⌗</div><div class="stat-label">Total QR Generated</div><div class="stat-number" id="totalGenerated">—</div><div class="stat-note">Lifetime ID records stored</div></article>
+            </div>
+            <div class="about-card-footer">Live totals from stored DRQR ID records</div>
+          </section>
+        </div>
+      </div>
       <a class="admin-link" href="admin.html">Admin</a>
     </div>
   </header>
@@ -106,11 +120,6 @@
       <div class="eyebrow">TODAY • BANGLADESH TIME</div>
       <h1>DRQR – Daily Rider ID Search &amp; QR Code Generator</h1>
       <p>Find today’s rider ID in Bangladesh by entering the full ID or its last 3–4 characters. You can also generate a QR code for an ID online for free.</p>
-
-      <section class="stats-grid" aria-label="DRQR lifetime statistics">
-        <article class="stat-card"><div class="stat-icon">▦</div><div class="stat-label">Total QR Submitted</div><div class="stat-number" id="totalSubmitted">—</div><div class="stat-note">IDs added through Admin</div></article>
-        <article class="stat-card"><div class="stat-icon">⌗</div><div class="stat-label">Total QR Generated</div><div class="stat-number" id="totalGenerated">—</div><div class="stat-note">Lifetime ID records stored</div></article>
-      </section>
 
       <div class="search-wrap">
         <input id="searchInput" type="search" autocomplete="off"
@@ -202,7 +211,28 @@
     })();
   </script>
 
+
+  <script>
+    (() => {
+      const panel = document.getElementById('statsDropdown');
+      const btn = document.getElementById('statsBtn');
+      const closeBtn = document.getElementById('closeStats');
+      const wrap = document.querySelector('.stats-menu-wrap');
+      if (!panel || !btn || !closeBtn || !wrap) return;
+      const closePanel = () => { panel.classList.add('hidden'); btn.setAttribute('aria-expanded','false'); };
+      btn.addEventListener('click', event => {
+        event.stopPropagation();
+        const open = panel.classList.contains('hidden');
+        panel.classList.toggle('hidden', !open);
+        btn.setAttribute('aria-expanded', String(open));
+      });
+      closeBtn.addEventListener('click', closePanel);
+      panel.addEventListener('click', event => event.stopPropagation());
+      document.addEventListener('click', event => { if (!wrap.contains(event.target)) closePanel(); });
+      document.addEventListener('keydown', event => { if (event.key === 'Escape') closePanel(); });
+    })();
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-  <script type="module" src="app.js?v=20261016-stats1"></script>
+  <script type="module" src="app.js?v=20261016-stats2"></script>
 </body>
 </html>
