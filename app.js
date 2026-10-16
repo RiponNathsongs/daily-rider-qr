@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getFirestore, collection, query, where, onSnapshot, getCountFromServer } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
@@ -12,12 +12,12 @@ const quickId = document.getElementById("quickId");
 const totalSubmittedEl = document.getElementById("totalSubmitted");
 const totalGeneratedEl = document.getElementById("totalGenerated");
 
-// Read-only lifetime stats from existing dailyIds documents; the public page cannot write counters.
-onSnapshot(collection(db, "dailyIds"), snap => {
-  const formatted = snap.size.toLocaleString("en-US");
+// Load lifetime statistics with an aggregate count instead of streaming every document.
+getCountFromServer(collection(db, "dailyIds")).then(snapshot => {
+  const formatted = snapshot.data().count.toLocaleString("en-US");
   if (totalSubmittedEl) totalSubmittedEl.textContent = formatted;
   if (totalGeneratedEl) totalGeneratedEl.textContent = formatted;
-}, err => {
+}).catch(err => {
   console.error("Could not load lifetime stats:", err);
   if (totalSubmittedEl) totalSubmittedEl.textContent = "—";
   if (totalGeneratedEl) totalGeneratedEl.textContent = "—";
@@ -37,14 +37,40 @@ const today = bdDateKey();
 todayLabel.textContent = bdDateText();
 
 let records = [];
-const q = query(collection(db, "dailyIds"), where("dateKey", "==", today));
+const cacheKey = "drqr-today-ids-" + today;
 
+// Render the last successful result immediately while Firebase reconnects.
+try {
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    const parsed = JSON.parse(cached);
+    if (Array.isArray(parsed)) {
+      records = parsed;
+      renderRecords();
+    }
+  }
+} catch (err) {
+  console.warn("Could not read cached rider IDs:", err);
+}
+if (!records.length) {
+  results.innerHTML = '<div class="empty">Loading today\'s IDs…</div>';
+}
+
+const q = query(collection(db, "dailyIds"), where("dateKey", "==", today));
 onSnapshot(q, snap => {
-  records = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  renderRecords();
+  const freshRecords = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const changed = JSON.stringify(records) !== JSON.stringify(freshRecords);
+  records = freshRecords;
+  try { localStorage.setItem(cacheKey, JSON.stringify(records)); } catch (err) {
+    console.warn("Could not cache rider IDs:", err);
+  }
+  // Avoid rebuilding every QR code if the live result is identical to the cache.
+  if (changed || !results.querySelector(".result-card")) renderRecords();
 }, err => {
-  results.innerHTML = '<div class="empty">Could not load today\'s IDs. Please check the Firebase setup.</div>';
-  console.error(err);
+  console.error("Could not load today's IDs:", err);
+  if (!records.length) {
+    results.innerHTML = '<div class="empty">Could not load today\'s IDs. Please check your connection and try again.</div>';
+  }
 });
 
 // Build cards and QR codes only when Firebase data changes, not on every keystroke.
