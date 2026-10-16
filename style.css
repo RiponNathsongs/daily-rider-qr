@@ -536,3 +536,16 @@ body.light-mode .stats-dropdown .stat-note{color:#687f94}
 @media(prefers-reduced-motion:reduce){
   .about-dropdown,.about-dropdown.mac-maximized{animation:none}
 }
+
+
+/* Slower, smoother macOS-style window transitions */
+.about-dropdown{
+  animation-duration:.65s;
+  animation-timing-function:cubic-bezier(.16,1,.3,1);
+  transition:opacity .5s ease,transform .5s cubic-bezier(.16,1,.3,1),filter .5s ease;
+}
+.about-dropdown.mac-maximized{
+  animation-duration:.55s;
+  animation-timing-function:cubic-bezier(.16,1,.3,1);
+}
+.mac-dot{transition:filter .2s ease,transform .2s ease}
