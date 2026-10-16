@@ -315,3 +315,16 @@ body.light-mode .about-dropdown .about-card-footer{color:#607087}
 .stat-icon{font-size:22px;color:var(--cyan);font-weight:900;margin-bottom:12px}.stat-label{font-size:13px;color:var(--muted);font-weight:750}.stat-number{font-size:clamp(30px,5vw,42px);line-height:1.2;font-weight:900;letter-spacing:-1px;margin:7px 0;color:var(--text);overflow-wrap:anywhere}.stat-note{font-size:11px;color:var(--muted)}
 body.light-mode .stat-card{background:linear-gradient(145deg,rgba(66,217,255,.12),rgba(77,124,255,.06)),rgba(255,255,255,.94);box-shadow:0 16px 36px rgba(30,55,80,.12),inset 0 1px 0 rgba(255,255,255,.9)}
 @media(max-width:520px){.stats-grid{gap:10px}.stat-card{padding:16px 13px;border-radius:16px}.stat-icon{margin-bottom:8px}.stat-label{font-size:11px}.stat-note{font-size:10px}.stat-number{font-size:clamp(25px,7vw,34px)}}
+
+
+/* Statistics dropdown matches the About Me menu */
+.stats-menu-wrap{position:relative;display:inline-flex;align-items:center}
+.stats-dropdown{right:0;left:auto;width:min(460px,calc(100vw - 28px));max-height:80vh;overflow-y:auto}
+.stats-dropdown .stats-popup-card{width:100%;padding:22px}
+.stats-dropdown .stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:8px 0 0;max-width:none}
+.stats-dropdown .stat-card{min-width:0;padding:17px 14px;border-radius:16px}
+.stats-dropdown .stat-number{font-size:clamp(25px,4vw,36px)}
+.stats-dropdown .stat-label{font-size:12px}
+.stats-dropdown .stat-note{font-size:10px;line-height:1.4}
+body.light-mode .stats-dropdown .about-card{background:linear-gradient(145deg,#fff,#f0f5fb);color:#172437;border-color:rgba(22,42,66,.13)}
+@media(max-width:520px){.stats-dropdown{right:-50px;width:min(420px,calc(100vw - 20px));top:calc(100% + 12px)}.stats-dropdown .stats-popup-card{padding:18px 14px}.stats-dropdown .stats-grid{gap:8px}.stats-dropdown .stat-card{padding:13px 10px}}
