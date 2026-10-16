@@ -9,6 +9,19 @@ const searchInput = document.getElementById("searchInput");
 const results = document.getElementById("results");
 const todayLabel = document.getElementById("todayLabel");
 const quickId = document.getElementById("quickId");
+const totalSubmittedEl = document.getElementById("totalSubmitted");
+const totalGeneratedEl = document.getElementById("totalGenerated");
+
+// Read-only lifetime stats from existing dailyIds documents; the public page cannot write counters.
+onSnapshot(collection(db, "dailyIds"), snap => {
+  const formatted = snap.size.toLocaleString("en-US");
+  if (totalSubmittedEl) totalSubmittedEl.textContent = formatted;
+  if (totalGeneratedEl) totalGeneratedEl.textContent = formatted;
+}, err => {
+  console.error("Could not load lifetime stats:", err);
+  if (totalSubmittedEl) totalSubmittedEl.textContent = "—";
+  if (totalGeneratedEl) totalGeneratedEl.textContent = "—";
+});
 
 function bdDateKey() {
   return new Intl.DateTimeFormat("en-CA", {
