@@ -328,3 +328,88 @@ body.light-mode .stat-card{background:linear-gradient(145deg,rgba(66,217,255,.12
 .stats-dropdown .stat-note{font-size:10px;line-height:1.4}
 body.light-mode .stats-dropdown .about-card{background:linear-gradient(145deg,#fff,#f0f5fb);color:#172437;border-color:rgba(22,42,66,.13)}
 @media(max-width:520px){.stats-dropdown{right:-50px;width:min(420px,calc(100vw - 20px));top:calc(100% + 12px)}.stats-dropdown .stats-popup-card{padding:18px 14px}.stats-dropdown .stats-grid{gap:8px}.stats-dropdown .stat-card{padding:13px 10px}}
+
+
+/* Refined Statistics popup layout */
+.stats-dropdown .stats-popup-card{
+  padding:24px 22px 18px;
+}
+.stats-dropdown .about-card-topline{
+  margin:0 38px 20px 0;
+  font-size:10px;
+  letter-spacing:1.35px;
+  line-height:1.5;
+}
+.stats-dropdown .stats-grid{
+  align-items:stretch;
+  gap:14px;
+  margin:0;
+}
+.stats-dropdown .stat-card{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:174px;
+  padding:20px 12px 18px;
+  text-align:center;
+  border-radius:18px;
+  border-color:rgba(105,211,255,.19);
+  background:linear-gradient(155deg,rgba(66,217,255,.11),rgba(77,124,255,.10)),rgba(8,22,39,.66);
+  box-shadow:0 12px 26px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.stats-dropdown .stat-icon{
+  display:grid;
+  place-items:center;
+  width:42px;
+  height:42px;
+  margin:0 0 13px;
+  border:1px solid rgba(66,217,255,.22);
+  border-radius:14px;
+  background:rgba(66,217,255,.09);
+  font-size:21px;
+}
+.stats-dropdown .stat-label{
+  min-height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  line-height:1.45;
+  color:#c1d8e9;
+}
+.stats-dropdown .stat-number{
+  margin:7px 0 5px;
+  font-size:clamp(28px,4vw,36px);
+  line-height:1.15;
+  letter-spacing:-.6px;
+  color:#f2fbff;
+}
+.stats-dropdown .stat-note{
+  font-size:10px;
+  line-height:1.5;
+  color:#8faec5;
+}
+.stats-dropdown .about-card-footer{
+  margin-top:18px;
+  padding-top:13px;
+  line-height:1.5;
+}
+body.light-mode .stats-dropdown .stat-card{
+  background:linear-gradient(155deg,rgba(66,217,255,.12),rgba(77,124,255,.07)),#f8fbff;
+  border-color:rgba(28,108,148,.16);
+  box-shadow:0 10px 24px rgba(31,58,87,.08),inset 0 1px 0 rgba(255,255,255,.95);
+}
+body.light-mode .stats-dropdown .stat-label{color:#52677d}
+body.light-mode .stats-dropdown .stat-number{color:#142a42}
+body.light-mode .stats-dropdown .stat-note{color:#687f94}
+@media(max-width:520px){
+  .stats-dropdown .stats-popup-card{padding:19px 13px 15px}
+  .stats-dropdown .about-card-topline{font-size:9px;letter-spacing:1px;margin-bottom:15px}
+  .stats-dropdown .stats-grid{gap:9px}
+  .stats-dropdown .stat-card{min-height:158px;padding:15px 8px 13px;border-radius:15px}
+  .stats-dropdown .stat-icon{width:36px;height:36px;border-radius:12px;margin-bottom:10px}
+  .stats-dropdown .stat-label{font-size:11px;min-height:32px}
+  .stats-dropdown .stat-number{font-size:27px}
+  .stats-dropdown .stat-note{font-size:9px}
+}
