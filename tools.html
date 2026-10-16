@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free DRQR utilities: QR scanner, QR maker, ID formatter, barcode generator, fuel and income calculators, notes and speed test.">
+  <meta name="theme-color" content="#0b1220">
+  <title>DRQR Tools | Free Rider Utilities</title>
+  <link rel="icon" type="image/svg+xml" href="favicon-public.svg">
+  <link rel="stylesheet" href="style.css?v=20261016-tools1">
+</head>
+<body class="tools-page">
+  <header class="topbar">
+    <div><a href="index.html" style="text-decoration:none;color:inherit"><div class="brand">DR<span>QR</span></div><div class="tagline">Helpful tools for everyday work</div></a></div>
+    <nav class="topbar-actions" aria-label="Main navigation">
+      <button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false">☀️ White Mode</button>
+      <a class="tools-link" href="tools.html" aria-current="page">🧰 Tools</a>
+      <a class="admin-link" href="index.html">Home</a>
+      <a class="admin-link" href="admin.html">Admin</a>
+    </nav>
+  </header>
+  <main class="tools-container">
+    <section class="tools-intro">
+      <div class="eyebrow">DRQR • FREE UTILITIES</div>
+      <h1>Tools Dashboard</h1>
+      <p>Eight useful tools in one place. QR and barcode creation, ID formatting, rider cost calculations and personal notes—all without changing your DRQR Firebase data.</p>
+    </section>
+    <section class="tools-grid" aria-label="Available tools">
+      <article class="tool-panel" id="qr-scanner">
+        <h2>📷 QR Scanner</h2><p class="tool-description">Scan a QR code using your device camera. Camera access requires permission and a secure HTTPS page.</p>
+        <div class="tool-actions"><button class="primary-btn" id="startScanner" type="button">Start camera</button><button id="stopScanner" type="button">Stop</button></div>
+        <video id="scannerVideo" playsinline muted class="hidden"></video>
+        <div id="scannerResult" class="tool-output" aria-live="polite"></div>
+        <p class="tool-muted" id="scannerSupport">If your browser does not support QR detection, use a browser with BarcodeDetector support.</p>
+      </article>
+      <article class="tool-panel" id="custom-qr">
+        <h2>🔳 Custom QR Maker</h2><p class="tool-description">Create a downloadable QR code for an ID, URL, contact detail or any short text.</p>
+        <label for="qrText">Text or URL</label><textarea id="qrText" placeholder="Enter text, rider ID or https://example.com"></textarea>
+        <div class="tool-two-col"><div><label for="qrSize">Size</label><select id="qrSize"><option value="180">180 × 180</option><option value="260" selected>260 × 260</option><option value="360">360 × 360</option></select></div><div><label for="qrFileName">File name</label><input id="qrFileName" value="drqr-code" maxlength="60"></div></div>
+        <div class="tool-actions"><button class="primary-btn" id="makeQr" type="button">Create QR</button><button id="downloadQr" type="button">Download PNG</button></div>
+        <div id="customQrPreview" class="tool-preview" aria-label="QR preview"></div><div id="qrMakerStatus" class="tool-output" aria-live="polite"></div>
+      </article>
+      <article class="tool-panel" id="id-formatter">
+        <h2>🧹 ID Formatter</h2><p class="tool-description">Clean up IDs by removing extra spaces, converting to uppercase and formatting a list one ID per line.</p>
+        <label for="idsInput">Paste one or more IDs</label><textarea id="idsInput" placeholder="dk061026jz4cyv&#10; another-id"></textarea>
+        <div class="tool-actions"><button class="primary-btn" id="formatIds" type="button">Format IDs</button><button id="copyFormatted" type="button">Copy result</button></div>
+        <label for="idsOutput">Formatted result</label><textarea id="idsOutput" readonly placeholder="Formatted IDs will appear here"></textarea><div id="formatterStatus" class="tool-output" aria-live="polite"></div>
+      </article>
+      <article class="tool-panel" id="barcode-generator">
+        <h2>🏷️ Barcode Generator</h2><p class="tool-description">Generate a Code 128 barcode for text or a rider ID. Some characters may be rejected by barcode rules.</p>
+        <label for="barcodeText">Text or ID</label><input id="barcodeText" placeholder="Enter a barcode value" maxlength="100">
+        <div class="tool-actions"><button class="primary-btn" id="makeBarcode" type="button">Generate barcode</button><button id="downloadBarcode" type="button">Download SVG</button></div>
+        <div id="barcodePreview" class="tool-preview"></div><div id="barcodeStatus" class="tool-output" aria-live="polite"></div>
+      </article>
+      <article class="tool-panel" id="fuel-calculator">
+        <h2>⛽ Fuel Cost Calculator</h2><p class="tool-description">Estimate fuel cost for a trip using distance, mileage and fuel price. Results are estimates, not official rates.</p>
+        <div class="tool-two-col"><div><label for="fuelDistance">Distance (km)</label><input id="fuelDistance" type="number" min="0" step="any" placeholder="e.g. 120"></div><div><label for="fuelMileage">Mileage (km/litre)</label><input id="fuelMileage" type="number" min="0.01" step="any" placeholder="e.g. 40"></div></div>
+        <label for="fuelPrice">Fuel price (BDT/litre)</label><input id="fuelPrice" type="number" min="0" step="any" placeholder="e.g. 125">
+        <div class="tool-actions"><button class="primary-btn" id="calculateFuel" type="button">Calculate cost</button></div><div id="fuelResult" class="tool-output" aria-live="polite"></div>
+      </article>
+      <article class="tool-panel" id="income-calculator">
+        <h2>💵 Rider Income Calculator</h2><p class="tool-description">Calculate estimated net income after expenses. Enter your own amounts; values are not uploaded.</p>
+        <div class="tool-two-col"><div><label for="incomeBase">Base income (BDT)</label><input id="incomeBase" type="number" min="0" step="any" placeholder="e.g. 1500"></div><div><label for="incomeBonus">Bonus / tips (BDT)</label><input id="incomeBonus" type="number" min="0" step="any" placeholder="e.g. 250"></div></div>
+        <div class="tool-two-col"><div><label for="incomeFuel">Fuel expense (BDT)</label><input id="incomeFuel" type="number" min="0" step="any" placeholder="e.g. 200"></div><div><label for="incomeOther">Other expenses (BDT)</label><input id="incomeOther" type="number" min="0" step="any" placeholder="e.g. 80"></div></div>
+        <div class="tool-actions"><button class="primary-btn" id="calculateIncome" type="button">Calculate net income</button></div><div id="incomeResult" class="tool-output" aria-live="polite"></div>
+      </article>
+      <article class="tool-panel" id="quick-notes">
+        <h2>📝 Quick Notes</h2><p class="tool-description">Save short personal notes in this browser only. Notes do not sync to Firebase or other devices.</p>
+        <label for="notesInput">Your note</label><textarea id="notesInput" placeholder="Write a reminder or note..." maxlength="10000"></textarea>
+        <div class="tool-actions"><button class="primary-btn" id="saveNotes" type="button">Save notes</button><button id="clearNotes" type="button">Clear notes</button></div><div id="notesStatus" class="tool-output" aria-live="polite"></div>
+      </article>
+      <article class="tool-panel" id="speed-test">
+        <h2>🌐 Internet Speed Test</h2><p class="tool-description">Runs a small download test and estimates throughput. Results depend on your connection, browser, and test server; this is not a certified speed test.</p>
+        <label for="speedSize">Test download size</label><select id="speedSize"><option value="1000000">1 MB — quicker</option><option value="5000000" selected>5 MB — more representative</option><option value="10000000">10 MB — uses more data</option></select>
+        <div class="tool-actions"><button class="primary-btn" id="runSpeedTest" type="button">Start speed test</button></div><div id="speedResult" class="tool-output" aria-live="polite"></div>
+        <p class="tool-muted">The test downloads temporary data from Cloudflare. Avoid running repeatedly on a limited mobile data plan.</p>
+      </article>
+    </section>
+    <p class="tools-footer">DRQR Tools • Local utilities • No additional Firebase permissions required</p>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+  <script src="tools.js?v=20261016-tools1"></script>
+</body>
+</html>
