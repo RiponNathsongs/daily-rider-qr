@@ -47,7 +47,7 @@
   }
   </script>
   <link rel="icon" type="image/svg+xml" href="favicon-public.svg">
-  <link rel="stylesheet" href="style.css?v=20261016-tools1">
+  <link rel="stylesheet" href="style.css?v=20261016-toolmenu2">
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-RF9NTH2KFB"></script>
   <script>
@@ -111,7 +111,27 @@
           </section>
         </div>
       </div>
-      <a class="tools-link" href="tools.html" aria-label="Open DRQR tools">🧰 Tools</a>
+      <div class="tools-menu-wrap">
+        <button id="toolsMenuBtn" class="about-trigger tools-menu-trigger" type="button" aria-haspopup="true" aria-controls="toolsDropdown" aria-expanded="false"><span aria-hidden="true">🧰</span> Tools <span class="about-chevron" aria-hidden="true">⌄</span></button>
+        <div id="toolsDropdown" class="about-dropdown tools-dropdown hidden" role="region" aria-label="DRQR tools menu">
+          <section class="about-card tools-menu-card">
+            <div class="about-glass-glow" aria-hidden="true"></div>
+            <div class="about-card-topline mac-window-bar"><span class="mac-window-controls"><button class="mac-dot mac-close" type="button" aria-label="Close Tools menu" data-window-action="close"></button><button class="mac-dot mac-minimize" type="button" aria-label="Minimize Tools menu" data-window-action="minimize"></button><button class="mac-dot mac-maximize" type="button" aria-label="Maximize Tools menu" data-window-action="maximize"></button></span><span class="mac-window-title">DRQR — Tools</span><span class="about-status-dot"></span></div>
+            <p class="tools-menu-subtitle">Choose a tool to open</p>
+            <nav class="tools-menu-list" aria-label="Available tools">
+              <a href="tools.html#qr-scanner"><span class="tools-menu-icon">📷</span><span><strong>QR Scanner</strong><small>Scan a QR with your camera</small></span><span class="tools-menu-arrow">↗</span></a>
+              <a href="tools.html#custom-qr"><span class="tools-menu-icon">🔳</span><span><strong>Custom QR Maker</strong><small>Create and download QR codes</small></span><span class="tools-menu-arrow">↗</span></a>
+              <a href="tools.html#id-formatter"><span class="tools-menu-icon">🧹</span><span><strong>ID Formatter</strong><small>Clean and format ID lists</small></span><span class="tools-menu-arrow">↗</span></a>
+              <a href="tools.html#barcode-generator"><span class="tools-menu-icon">🏷️</span><span><strong>Barcode Generator</strong><small>Create a Code 128 barcode</small></span><span class="tools-menu-arrow">↗</span></a>
+              <a href="tools.html#fuel-calculator"><span class="tools-menu-icon">⛽</span><span><strong>Fuel Cost Calculator</strong><small>Estimate trip fuel expenses</small></span><span class="tools-menu-arrow">↗</span></a>
+              <a href="tools.html#income-calculator"><span class="tools-menu-icon">💵</span><span><strong>Rider Income Calculator</strong><small>Estimate net income</small></span><span class="tools-menu-arrow">↗</span></a>
+              <a href="tools.html#quick-notes"><span class="tools-menu-icon">📝</span><span><strong>Quick Notes</strong><small>Save notes in this browser</small></span><span class="tools-menu-arrow">↗</span></a>
+              <a href="tools.html#speed-test"><span class="tools-menu-icon">🌐</span><span><strong>Internet Speed Test</strong><small>Check estimated download speed</small></span><span class="tools-menu-arrow">↗</span></a>
+            </nav>
+            <a class="tools-menu-all" href="tools.html">Open all tools dashboard <span aria-hidden="true">→</span></a>
+          </section>
+        </div>
+      </div>
       <a class="admin-link" href="admin.html">Admin</a>
     </div>
   </header>
@@ -246,6 +266,37 @@
       document.addEventListener('keydown', event => { if (event.key === 'Escape') closePanel(); });
     })();
   </script>
+
+  <script>
+    (() => {
+      const panel = document.getElementById('toolsDropdown');
+      const btn = document.getElementById('toolsMenuBtn');
+      const wrap = document.querySelector('.tools-menu-wrap');
+      if (!panel || !btn || !wrap) return;
+      const closePanel = () => {
+        panel.classList.add('hidden');
+        panel.classList.remove('mac-maximized');
+        btn.setAttribute('aria-expanded', 'false');
+      };
+      btn.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        const open = panel.classList.contains('hidden');
+        panel.classList.toggle('hidden', !open);
+        btn.setAttribute('aria-expanded', String(open));
+      });
+      panel.querySelectorAll('[data-window-action="close"],[data-window-action="minimize"]').forEach(control => {
+        control.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); closePanel(); });
+      });
+      panel.querySelectorAll('[data-window-action="maximize"]').forEach(control => {
+        control.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); panel.classList.toggle('mac-maximized'); });
+      });
+      panel.addEventListener('click', event => event.stopPropagation());
+      document.addEventListener('click', event => { if (!wrap.contains(event.target)) closePanel(); });
+      document.addEventListener('keydown', event => { if (event.key === 'Escape') closePanel(); });
+    })();
+  </script>
+
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script type="module" src="app.js?v=20261016-stats2"></script>
 </body>
