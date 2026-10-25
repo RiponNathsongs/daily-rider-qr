@@ -99,19 +99,54 @@ function renderRecords() {
     `;
   }).join("") + '<div class="empty hidden" id="filterEmpty">No matching ID found.</div>';
 
-  records.forEach((r, i) => {
-    const box = document.getElementById(`qr-${i}`);
-    if (box && typeof QRCode !== "undefined") {
-      new QRCode(box, {
-        text: String(r.code ?? ""),
-        width: 130,
-        height: 130,
-        correctLevel: QRCode.CorrectLevel.M
-      });
-    }
-  });
-
   applyFilter();
+
+  // Generate QR codes during browser idle time in small batches so the search
+  // field and mobile keyboard remain responsive while the page is opening.
+  scheduleQrRendering(records.map((r, i) => ({ code: String(r.code ?? ""), index: i })));
+}
+
+let qrRenderQueue = [];
+let qrRenderScheduled = false;
+
+function scheduleQrRendering(items) {
+  qrRenderQueue = items;
+  if (qrRenderScheduled) return;
+  qrRenderScheduled = true;
+
+  const runBatch = deadline => {
+    let processed = 0;
+    while (qrRenderQueue.length && processed < 2 &&
+           (!deadline || deadline.timeRemaining() > 5 || processed === 0)) {
+      const item = qrRenderQueue.shift();
+      const box = document.getElementById(`qr-${item.index}`);
+      if (box && !box.hasChildNodes() && typeof QRCode !== "undefined") {
+        new QRCode(box, {
+          text: item.code,
+          width: 130,
+          height: 130,
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+      processed++;
+    }
+
+    if (qrRenderQueue.length) {
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(runBatch, { timeout: 250 });
+      } else {
+        window.setTimeout(() => runBatch(null), 30);
+      }
+    } else {
+      qrRenderScheduled = false;
+    }
+  };
+
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(runBatch, { timeout: 250 });
+  } else {
+    window.setTimeout(() => runBatch(null), 30);
+  }
 }
 
 function applyFilter() {
