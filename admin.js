@@ -145,3 +145,58 @@ document.getElementById("idForm").onsubmit=async e=>{
   }
 };
 function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
+
+
+async function loadComments() {
+  const box = document.getElementById("adminComments");
+  if (!box) return;
+  box.textContent = "Loading comments…";
+  try {
+    const snap = await getDocs(query(collection(db, "comments"), orderBy("createdAt", "desc"), limit(200)));
+    if (snap.empty) { box.textContent = "No comments submitted yet."; return; }
+    box.replaceChildren();
+    snap.docs.forEach(d => {
+      const c = d.data();
+      const card = document.createElement("article");
+      card.className = "admin-item comment-admin-item";
+      const title = document.createElement("strong");
+      title.textContent = c.name || "Visitor";
+      const status = document.createElement("span");
+      status.className = "comment-status-badge status-" + String(c.status || "pending");
+      status.textContent = String(c.status || "pending");
+      const body = document.createElement("p");
+      body.className = "comment-body";
+      body.textContent = c.text || "";
+      const date = document.createElement("small");
+      date.className = "comment-admin-date";
+      date.textContent = c.createdAt && c.createdAt.toDate ? c.createdAt.toDate().toLocaleString("en-BD", {timeZone:"Asia/Dhaka"}) : "Just now";
+      const actions = document.createElement("div");
+      actions.className = "admin-item-actions";
+      if (c.status !== "approved") actions.appendChild(makeCommentButton("Approve", async () => { await updateDoc(doc(db, "comments", d.id), {status:"approved"}); await loadComments(); }));
+      if (c.status !== "hidden") actions.appendChild(makeCommentButton("Hide", async () => { await updateDoc(doc(db, "comments", d.id), {status:"hidden"}); await loadComments(); }));
+      actions.appendChild(makeCommentButton("Delete", async () => {
+        if (!confirm("Delete this comment permanently?")) return;
+        await deleteDoc(doc(db, "comments", d.id)); await loadComments();
+      }));
+      const heading = document.createElement("div");
+      heading.className = "comment-meta";
+      heading.append(title, status);
+      card.append(heading, date, body, actions);
+      box.appendChild(card);
+    });
+  } catch (err) {
+    console.error("Could not load comments:", err);
+    box.textContent = "Could not load comments: " + (err.code || err.message || "Unknown error");
+  }
+}
+function makeCommentButton(label, action) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    try { await action(); }
+    catch (err) { console.error(err); alert("Action failed: " + (err.code || err.message || "Unknown error")); button.disabled = false; }
+  });
+  return button;
+}
