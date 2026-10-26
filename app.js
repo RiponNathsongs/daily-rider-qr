@@ -424,6 +424,19 @@ function subscribeToComments() {
     commentsList.innerHTML = '<div class="empty">Comments could not load right now. Please refresh the page later.</div>';
   });
 }
+const COMMENT_COOLDOWN_MS = 30 * 1000;
+const COMMENT_LAST_POST_KEY = "drqr-comment-last-post";
+const COMMENT_LAST_TEXT_KEY = "drqr-comment-last-text";
+
+function getCommentCooldownRemaining() {
+  try {
+    const last = Number(localStorage.getItem(COMMENT_LAST_POST_KEY) || 0);
+    return Math.max(0, COMMENT_COOLDOWN_MS - (Date.now() - last));
+  } catch (_) { return 0; }
+}
+function formatCooldown(ms) {
+  return Math.ceil(ms / 1000);
+}
 if (commentForm) {
   ensureCommentUser().then(subscribeToComments).catch(err => {
     console.error("Anonymous sign-in failed:", err);
@@ -433,11 +446,31 @@ if (commentForm) {
     e.preventDefault();
     const name = commentName.value.trim(), body = commentText.value.trim();
     if (name.length < 2 || body.length < 2) { commentStatus.textContent = "Please enter your name and a comment."; return; }
+    if (name.length > 40 || body.length > 1000) { commentStatus.textContent = "Name must be 2–40 characters and comment must be no more than 1000 characters."; return; }
+    // Basic client-side spam checks. Firestore rules/admin moderation remain important.
+    const linkCount = (body.match(/https?:\/\/|www\./gi) || []).length;
+    if (linkCount > 1) { commentStatus.textContent = "For safety, comments may contain at most one link."; return; }
+    const normalizedBody = body.toLowerCase().replace(/\s+/g, " ").trim();
+    try {
+      if (localStorage.getItem(COMMENT_LAST_TEXT_KEY) === normalizedBody) {
+        commentStatus.textContent = "You already submitted this exact comment recently. Please write something new.";
+        return;
+      }
+    } catch (_) {}
+    const remaining = getCommentCooldownRemaining();
+    if (remaining > 0) {
+      commentStatus.textContent = "Please wait " + formatCooldown(remaining) + " seconds before posting another comment.";
+      return;
+    }
     const button = document.getElementById("submitComment"); button.disabled = true;
     commentStatus.textContent = "Posting for admin review…";
     try {
       const user = await ensureCommentUser();
       await addDoc(collection(db,"comments"),{name,text:body,uid:user.uid,parentId:null,status:"pending",createdAt:serverTimestamp()});
+      try {
+        localStorage.setItem(COMMENT_LAST_POST_KEY, String(Date.now()));
+        localStorage.setItem(COMMENT_LAST_TEXT_KEY, normalizedBody);
+      } catch (_) {}
       commentText.value = ""; commentStatus.textContent = "Submitted! Your comment will appear after admin approval.";
     } catch(err) { console.error("Could not submit comment:",err); commentStatus.textContent = "Could not post comment. Please check connection and try again."; }
     finally { button.disabled = false; }
