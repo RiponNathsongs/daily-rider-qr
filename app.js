@@ -387,9 +387,9 @@ function renderComments() {
   commentsList.innerHTML = parents.map(c => {
     const childReplies = replies.filter(r => r.parentId === c.id);
     const liked = commentLikeState.get(c.id) || false;
-    return `<article class="comment-card"><div class="comment-meta"><strong>${escapeHtml(c.name || "Visitor")}</strong><time>${escapeHtml(commentDate(c.createdAt))}</time></div>
+    return `<article class="comment-card"><div class="comment-meta"><strong>${escapeHtml(c.name || "Visitor")}${c.isAdmin ? '<span class="admin-badge" title="Official DRQR administrator">👑 Admin</span>' : ""}</strong><time>${escapeHtml(commentDate(c.createdAt))}</time></div>
       <p class="comment-body">${escapeHtml(c.text || "")}</p><div class="comment-actions"><button type="button" class="comment-like ${liked ? "is-liked" : ""}" data-like-comment="${escapeAttr(c.id)}" aria-pressed="${liked}">♥ <span>${c.likeCount || 0}</span> Like</button><button type="button" class="comment-reply" data-reply-comment="${escapeAttr(c.id)}">↩ Reply</button></div>
-      ${childReplies.map(r => `<div class="comment-reply-card"><div class="comment-meta"><strong>${escapeHtml(r.name || "Visitor")}</strong><time>${escapeHtml(commentDate(r.createdAt))}</time></div><p class="comment-body">${escapeHtml(r.text || "")}</p></div>`).join("")}</article>`;
+      ${childReplies.map(r => `<div class="comment-reply-card"><div class="comment-meta"><strong>${escapeHtml(r.name || "Visitor")}${r.isAdmin ? '<span class="admin-badge" title="Official DRQR administrator">👑 Admin</span>' : ""}</strong><time>${escapeHtml(commentDate(r.createdAt))}</time></div><p class="comment-body">${escapeHtml(r.text || "")}</p></div>`).join("")}</article>`;
   }).join("");
   commentsList.querySelectorAll("[data-like-comment]").forEach(btn => btn.addEventListener("click", () => toggleCommentLike(btn.dataset.likeComment)));
   commentsList.querySelectorAll("[data-reply-comment]").forEach(btn => btn.addEventListener("click", () => replyToComment(btn.dataset.replyComment)));
