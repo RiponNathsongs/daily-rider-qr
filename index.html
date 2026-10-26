@@ -156,8 +156,33 @@
           <small>Anyone can generate a QR here. Publicly generated IDs are not assigned to a rider.</small>
         </div>
         <div class="public-import-row">
-          <input id="quickId" type="text" placeholder="Enter ID">
+          <input id="quickId" type="text" placeholder="Enter ID" autocomplete="off">
           <button id="generateBtn" class="primary-btn" type="button">Generate QR</button>
+        </div>
+        <div id="qrCustomize" class="qr-customize hidden" aria-label="Customize QR code">
+          <section class="qr-option-card">
+            <div class="qr-option-heading"><span class="qr-step">01</span><div><h3>Choose a Color</h3><p>Default is classic black and white.</p></div></div>
+            <div class="qr-option-list" id="qrColorOptions" role="group" aria-label="QR color palettes">
+              <button type="button" class="qr-choice color-choice selected" data-color="default" aria-pressed="true"><span class="palette-swatch palette-default"><i></i></span><span>Normal</span></button>
+              <button type="button" class="qr-choice color-choice" data-color="ocean" aria-pressed="false"><span class="palette-swatch palette-ocean"><i></i></span><span>Ocean</span></button>
+              <button type="button" class="qr-choice color-choice" data-color="forest" aria-pressed="false"><span class="palette-swatch palette-forest"><i></i></span><span>Forest</span></button>
+              <button type="button" class="qr-choice color-choice" data-color="sunset" aria-pressed="false"><span class="palette-swatch palette-sunset"><i></i></span><span>Sunset</span></button>
+              <button type="button" class="qr-choice color-choice" data-color="violet" aria-pressed="false"><span class="palette-swatch palette-violet"><i></i></span><span>Violet</span></button>
+              <button type="button" class="qr-choice color-choice" data-color="ruby" aria-pressed="false"><span class="palette-swatch palette-ruby"><i></i></span><span>Ruby</span></button>
+            </div>
+          </section>
+          <section class="qr-option-card">
+            <div class="qr-option-heading"><span class="qr-step">02</span><div><h3>Choose a QR Style</h3><p>Choose the look of the QR modules.</p></div></div>
+            <div class="qr-option-list" id="qrStyleOptions" role="group" aria-label="QR styles">
+              <button type="button" class="qr-choice style-choice selected" data-style="square" aria-pressed="true"><span class="style-preview style-square">▦</span><span>Normal</span></button>
+              <button type="button" class="qr-choice style-choice" data-style="dots" aria-pressed="false"><span class="style-preview style-dots">⠿</span><span>Dots</span></button>
+              <button type="button" class="qr-choice style-choice" data-style="rounded" aria-pressed="false"><span class="style-preview style-rounded">▦</span><span>Rounded</span></button>
+              <button type="button" class="qr-choice style-choice" data-style="classy" aria-pressed="false"><span class="style-preview style-classy">▦</span><span>Classy</span></button>
+              <button type="button" class="qr-choice style-choice" data-style="classy-rounded" aria-pressed="false"><span class="style-preview style-classy-rounded">▦</span><span>Soft Classy</span></button>
+              <button type="button" class="qr-choice style-choice" data-style="extra-rounded" aria-pressed="false"><span class="style-preview style-extra-rounded">▦</span><span>Extra Round</span></button>
+            </div>
+            <div class="qr-customize-actions"><button id="createCustomQrBtn" class="primary-btn" type="button">Create QR Code</button></div>
+          </section>
         </div>
       </div>
     </section>
@@ -198,6 +223,7 @@
       <button id="closeModal" class="modal-close">×</button>
       <div id="modalQr" class="modal-qr"></div>
       <div id="modalText" class="modal-text"></div>
+      <div class="qr-download-row"><button id="downloadCustomQr" class="primary-btn hidden" type="button">Download QR</button></div>
       <div class="zoom-row">
         <button id="zoomOut">−</button>
         <button id="zoomIn">+</button>
@@ -300,6 +326,7 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
   <script type="module" src="app.js?v=20261025-mobileperf1"></script>
 </body>
 </html>
