@@ -233,6 +233,20 @@ document.querySelectorAll(".style-choice").forEach(button => {
   button.addEventListener("click", () => selectQrOption(".style-choice", button, "style"));
 });
 
+const qrGeneratorArea = document.querySelector(".public-import");
+function hideQrCustomize() {
+  if (qrCustomize) qrCustomize.classList.add("hidden");
+}
+document.addEventListener("click", event => {
+  if (qrCustomize && !qrCustomize.classList.contains("hidden") &&
+      qrGeneratorArea && !qrGeneratorArea.contains(event.target)) {
+    hideQrCustomize();
+  }
+});
+quickId.addEventListener("input", () => {
+  if (!quickId.value.trim()) hideQrCustomize();
+});
+
 document.getElementById("generateBtn").onclick = () => {
   const code = quickId.value.trim();
   if (!code) {
@@ -276,6 +290,7 @@ createCustomQrBtn.addEventListener("click", () => {
   scale = 1;
   downloadCustomQr.classList.remove("hidden");
   document.getElementById("qrModal").classList.remove("hidden");
+  hideQrCustomize();
 });
 
 downloadCustomQr.addEventListener("click", () => {
