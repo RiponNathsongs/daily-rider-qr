@@ -792,3 +792,40 @@ body.light-mode .admin-body,
     background: rgba(255,255,255,.97);
   }
 }
+
+
+/* DRQR community comments and admin moderation */
+.comments-section{margin:30px 0;padding:24px}
+.comments-subtitle{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.6}
+.comment-form{display:grid;gap:8px;margin:18px 0 22px}
+.comment-form label{font-size:12px;font-weight:800;color:var(--muted)}
+.comment-form input,.comment-form textarea{width:100%;box-sizing:border-box;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:rgba(3,13,25,.55);color:var(--text);font:inherit;outline:none}
+.comment-form textarea{resize:vertical;min-height:96px}
+.comment-form input:focus,.comment-form textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(66,217,255,.1)}
+.comment-form-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px}
+.comment-form-bottom small{color:var(--muted);font-size:12px;line-height:1.5}
+.comment-form button:disabled{opacity:.55;cursor:wait}
+.comments-list{display:grid;gap:12px}
+.comment-card{padding:16px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025);min-width:0}
+.comment-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.comment-meta strong{font-size:13px;overflow-wrap:anywhere}
+.comment-meta time,.comment-admin-date{font-size:11px;color:var(--muted)}
+.comment-body{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;font-size:14px;margin:10px 0}
+.comment-actions{display:flex;gap:8px;flex-wrap:wrap}
+.comment-actions button,.admin-item-actions button{border:1px solid var(--line);border-radius:9px;padding:7px 11px;background:rgba(66,217,255,.07);color:var(--text);font-size:12px;font-weight:750;cursor:pointer}
+.comment-actions button.is-liked{color:#ff6b91;border-color:rgba(255,107,145,.35);background:rgba(255,107,145,.1)}
+.comment-reply-card{margin:12px 0 0 16px;padding:12px;border-left:3px solid var(--cyan);border-radius:0 11px 11px 0;background:rgba(66,217,255,.055)}
+.comment-reply-card .comment-body{font-size:13px}
+.comment-admin-item{display:block;margin:10px 0}
+.comment-admin-date{margin:8px 0}
+.comment-status-badge{font-size:10px;text-transform:uppercase;letter-spacing:.6px;border-radius:7px;padding:5px 8px;background:rgba(255,188,46,.13);color:#d69a16}
+.comment-status-badge.status-approved{background:rgba(40,200,64,.12);color:#1d9b3a}
+.comment-status-badge.status-hidden{background:rgba(130,145,160,.15);color:var(--muted)}
+.admin-item-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.admin-item-actions button.danger{color:#ff6b78;border-color:rgba(255,107,120,.35)}
+body.light-mode .comment-form input,body.light-mode .comment-form textarea{background:#fff;color:#172437;border-color:rgba(22,42,66,.2)}
+body.light-mode .comment-card{background:#fff}
+body.light-mode .comment-actions button,body.light-mode .admin-item-actions button{color:#172437;background:#f3f7fb}
+body.light-mode .comment-actions button.is-liked{color:#bd244d;background:#fff0f3}
+body.light-mode .comment-status-badge.status-approved{color:#147a2a}
+@media(max-width:520px){.comments-section{padding:16px}.comment-form-bottom{align-items:stretch;flex-direction:column}.comment-form-bottom button{width:100%}.comment-card{padding:12px}.comment-reply-card{margin-left:8px;padding:10px}}
