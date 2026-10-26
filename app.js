@@ -286,6 +286,8 @@ downloadCustomQr.addEventListener("click", () => {
 let scale = 1;
 function openQr(code) {
   scale = 1;
+  currentCustomQr = null;
+  if (downloadCustomQr) downloadCustomQr.classList.add("hidden");
   document.getElementById("modalText").textContent = code;
   const box = document.getElementById("modalQr");
   box.innerHTML = "";
