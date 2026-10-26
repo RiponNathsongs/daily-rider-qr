@@ -829,3 +829,18 @@ body.light-mode .comment-actions button,body.light-mode .admin-item-actions butt
 body.light-mode .comment-actions button.is-liked{color:#bd244d;background:#fff0f3}
 body.light-mode .comment-status-badge.status-approved{color:#147a2a}
 @media(max-width:520px){.comments-section{padding:16px}.comment-form-bottom{align-items:stretch;flex-direction:column}.comment-form-bottom button{width:100%}.comment-card{padding:12px}.comment-reply-card{margin-left:8px;padding:10px}}
+
+
+/* Verified administrator identity badge in community comments */
+.admin-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  margin-left:8px;padding:3px 8px;border-radius:999px;
+  font-size:10px;font-weight:800;letter-spacing:.2px;line-height:1.4;
+  color:#075985;background:linear-gradient(135deg,#cffafe,#dbeafe);
+  border:1px solid rgba(14,165,233,.28);vertical-align:middle;
+  white-space:nowrap;
+}
+body:not(.light-mode) .admin-badge{
+  color:#a5f3fc;background:rgba(8,145,178,.16);
+  border-color:rgba(34,211,238,.28);
+}
