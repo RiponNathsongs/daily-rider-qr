@@ -197,10 +197,91 @@ results.addEventListener("click", async event => {
   if (qrBox) openQr(qrBox.dataset.zoomCode);
 });
 
+
+
+// Public custom QR flow: first reveal color and style cards, then render the chosen design.
+const qrCustomize = document.getElementById("qrCustomize");
+const createCustomQrBtn = document.getElementById("createCustomQrBtn");
+const downloadCustomQr = document.getElementById("downloadCustomQr");
+let selectedQrColor = "default";
+let selectedQrStyle = "square";
+let currentCustomQr = null;
+
+const qrPalettes = {
+  default: { dark: "#111111", light: "#ffffff" },
+  ocean: { dark: "#087eae", light: "#e8fbff" },
+  forest: { dark: "#176b3a", light: "#effff3" },
+  sunset: { dark: "#c84c20", light: "#fff4e8" },
+  violet: { dark: "#6535b8", light: "#f7f0ff" },
+  ruby: { dark: "#b51f4b", light: "#fff0f3" }
+};
+
+function selectQrOption(groupSelector, selectedButton, datasetKey) {
+  document.querySelectorAll(groupSelector).forEach(button => {
+    const active = button === selectedButton;
+    button.classList.toggle("selected", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  if (datasetKey === "color") selectedQrColor = selectedButton.dataset.color;
+  else selectedQrStyle = selectedButton.dataset.style;
+}
+
+document.querySelectorAll(".color-choice").forEach(button => {
+  button.addEventListener("click", () => selectQrOption(".color-choice", button, "color"));
+});
+document.querySelectorAll(".style-choice").forEach(button => {
+  button.addEventListener("click", () => selectQrOption(".style-choice", button, "style"));
+});
+
 document.getElementById("generateBtn").onclick = () => {
   const code = quickId.value.trim();
-  if (code) openQr(code);
+  if (!code) {
+    quickId.focus();
+    quickId.setCustomValidity("Please enter an ID first.");
+    quickId.reportValidity();
+    quickId.addEventListener("input", () => quickId.setCustomValidity(""), { once: true });
+    return;
+  }
+  qrCustomize.classList.remove("hidden");
+  qrCustomize.scrollIntoView({ behavior: "smooth", block: "nearest" });
 };
+
+createCustomQrBtn.addEventListener("click", () => {
+  const code = quickId.value.trim();
+  if (!code) { quickId.focus(); return; }
+  if (typeof QRCodeStyling === "undefined") {
+    alert("QR style library could not load. Please check your internet connection and try again.");
+    return;
+  }
+  const palette = qrPalettes[selectedQrColor] || qrPalettes.default;
+  const dotsType = selectedQrStyle === "square" ? "square" :
+    selectedQrStyle === "dots" ? "dots" :
+    selectedQrStyle === "rounded" ? "rounded" :
+    selectedQrStyle === "classy" ? "classy" :
+    selectedQrStyle === "classy-rounded" ? "classy-rounded" : "extra-rounded";
+  const box = document.getElementById("modalQr");
+  box.innerHTML = "";
+  currentCustomQr = new QRCodeStyling({
+    width: 280, height: 280, type: "canvas", data: code,
+    margin: 8,
+    qrOptions: { errorCorrectionLevel: "H" },
+    dotsOptions: { color: palette.dark, type: dotsType },
+    backgroundOptions: { color: palette.light },
+    cornersSquareOptions: { color: palette.dark, type: selectedQrStyle === "dots" ? "dot" : (selectedQrStyle === "extra-rounded" ? "extra-rounded" : "square") },
+    cornersDotOptions: { color: palette.dark, type: selectedQrStyle === "dots" ? "dot" : "square" }
+  });
+  currentCustomQr.append(box);
+  document.getElementById("modalText").textContent = code;
+  box.style.transform = "scale(1)";
+  scale = 1;
+  downloadCustomQr.classList.remove("hidden");
+  document.getElementById("qrModal").classList.remove("hidden");
+});
+
+downloadCustomQr.addEventListener("click", () => {
+  if (currentCustomQr) currentCustomQr.download({ name: "DRQR-" + (quickId.value.trim().replace(/[^a-z0-9_-]/gi, "-") || "custom"), extension: "png" });
+});
+
 
 let scale = 1;
 function openQr(code) {
