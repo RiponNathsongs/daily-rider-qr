@@ -410,9 +410,14 @@ async function loadCommentLikes() {
 function subscribeToComments() {
   if (!commentsList) return;
   if (commentsUnsubscribe) commentsUnsubscribe();
-  const approvedQuery = query(collection(db, "comments"), where("status", "==", "approved"), orderBy("createdAt", "desc"), limit(100));
+  const approvedQuery = query(collection(db, "comments"), where("status", "==", "approved"), limit(100));
   commentsUnsubscribe = onSnapshot(approvedQuery, snap => {
     approvedComments = snap.docs.map(d => ({id:d.id,...d.data(),likeCount:0}));
+    approvedComments.sort((a, b) => {
+      const aTime = a.createdAt && typeof a.createdAt.toMillis === "function" ? a.createdAt.toMillis() : 0;
+      const bTime = b.createdAt && typeof b.createdAt.toMillis === "function" ? b.createdAt.toMillis() : 0;
+      return bTime - aTime;
+    });
     renderComments(); loadCommentLikes();
   }, err => {
     console.error("Comments could not be loaded:", err);
