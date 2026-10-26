@@ -49,7 +49,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon-public.svg?v=20261025-drqr1">
   <link rel="shortcut icon" href="favicon-public.svg?v=20261025-drqr1">
   <meta name="application-name" content="DRQR">
-  <link rel="stylesheet" href="style.css?v=20261026-lightfix1">
+  <link rel="stylesheet" href="style.css?v=20261026-comments1">
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-RF9NTH2KFB"></script>
   <script>
@@ -195,6 +195,15 @@
       <div id="results" class="results"></div>
     </section>
   
+    <section class="comments-section panel wide" aria-labelledby="comments-title">
+      <div class="panel-head"><div><h2 id="comments-title">Community Comments</h2><p class="comments-subtitle">Share feedback or ask a question. Comments appear after admin approval.</p></div><span id="commentsCount" class="date-pill">0 comments</span></div>
+      <form id="commentForm" class="comment-form">
+        <label for="commentName">Your name</label><input id="commentName" type="text" maxlength="40" minlength="2" autocomplete="name" required placeholder="Enter your name">
+        <label for="commentText">Comment</label><textarea id="commentText" maxlength="1000" minlength="2" rows="4" required placeholder="Write a helpful comment (max 1000 characters)"></textarea>
+        <div class="comment-form-bottom"><small id="commentStatus" role="status">Comments are reviewed before appearing publicly.</small><button id="submitComment" class="primary-btn" type="submit">Post Comment</button></div>
+      </form><div id="commentsList" class="comments-list"><div class="empty">Loading comments…</div></div>
+    </section>
+
     <section class="seo-info" aria-labelledby="about-rider-qr">
       <h2 id="about-rider-qr">Find Today’s Rider ID Online</h2>
       <p>Daily Rider ID &amp; QR is a free online rider ID lookup and QR code generator. Search today’s available rider IDs using the complete ID or its last 3–4 characters. The daily list follows Bangladesh time (Asia/Dhaka).</p>
