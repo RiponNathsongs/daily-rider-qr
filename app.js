@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { getFirestore, collection, query, where, onSnapshot, getCountFromServer } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getFirestore, collection, query, where, onSnapshot, getCountFromServer, addDoc, serverTimestamp, doc, setDoc, deleteDoc, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
@@ -354,4 +355,108 @@ if (themeToggle) {
     applyTheme(isLight);
     try { localStorage.setItem("drqr-theme", isLight ? "light" : "dark"); } catch (_) {}
   });
+}
+
+
+// Community comments and moderation-aware replies.
+const commentAuth = getAuth(app);
+const commentForm = document.getElementById("commentForm");
+const commentName = document.getElementById("commentName");
+const commentText = document.getElementById("commentText");
+const commentStatus = document.getElementById("commentStatus");
+const commentsList = document.getElementById("commentsList");
+const commentsCount = document.getElementById("commentsCount");
+let approvedComments = [];
+let commentsUnsubscribe = null;
+const commentLikeState = new Map();
+async function ensureCommentUser() {
+  if (!commentAuth.currentUser) await signInAnonymously(commentAuth);
+  return commentAuth.currentUser;
+}
+function commentDate(value) {
+  if (!value) return "Just now";
+  const date = typeof value.toDate === "function" ? value.toDate() : new Date(value);
+  return Number.isNaN(date.getTime()) ? "Recently" : new Intl.DateTimeFormat("en-BD", {dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Dhaka"}).format(date);
+}
+function renderComments() {
+  if (!commentsList) return;
+  commentsCount.textContent = approvedComments.length + (approvedComments.length === 1 ? " comment" : " comments");
+  if (!approvedComments.length) { commentsList.innerHTML = '<div class="empty">No approved comments yet. Be the first to share feedback!</div>'; return; }
+  const parents = approvedComments.filter(c => !c.parentId);
+  const replies = approvedComments.filter(c => c.parentId);
+  commentsList.innerHTML = parents.map(c => {
+    const childReplies = replies.filter(r => r.parentId === c.id);
+    const liked = commentLikeState.get(c.id) || false;
+    return `<article class="comment-card"><div class="comment-meta"><strong>${escapeHtml(c.name || "Visitor")}</strong><time>${escapeHtml(commentDate(c.createdAt))}</time></div>
+      <p class="comment-body">${escapeHtml(c.text || "")}</p><div class="comment-actions"><button type="button" class="comment-like ${liked ? "is-liked" : ""}" data-like-comment="${escapeAttr(c.id)}" aria-pressed="${liked}">♥ <span>${c.likeCount || 0}</span> Like</button><button type="button" class="comment-reply" data-reply-comment="${escapeAttr(c.id)}">↩ Reply</button></div>
+      ${childReplies.map(r => `<div class="comment-reply-card"><div class="comment-meta"><strong>${escapeHtml(r.name || "Visitor")}</strong><time>${escapeHtml(commentDate(r.createdAt))}</time></div><p class="comment-body">${escapeHtml(r.text || "")}</p></div>`).join("")}</article>`;
+  }).join("");
+  commentsList.querySelectorAll("[data-like-comment]").forEach(btn => btn.addEventListener("click", () => toggleCommentLike(btn.dataset.likeComment)));
+  commentsList.querySelectorAll("[data-reply-comment]").forEach(btn => btn.addEventListener("click", () => replyToComment(btn.dataset.replyComment)));
+}
+async function loadCommentLikes() {
+  if (!commentAuth.currentUser) return;
+  await Promise.all(approvedComments.map(async c => {
+    try {
+      const likesRef = collection(db, "comments", c.id, "likes");
+      const count = await getCountFromServer(likesRef);
+      c.likeCount = count.data().count;
+      const mine = await getDocs(query(likesRef, where("uid", "==", commentAuth.currentUser.uid), limit(1)));
+      commentLikeState.set(c.id, !mine.empty);
+    } catch (err) { console.warn("Could not load comment likes", err); }
+  }));
+  renderComments();
+}
+function subscribeToComments() {
+  if (!commentsList) return;
+  if (commentsUnsubscribe) commentsUnsubscribe();
+  const approvedQuery = query(collection(db, "comments"), where("status", "==", "approved"), orderBy("createdAt", "desc"), limit(100));
+  commentsUnsubscribe = onSnapshot(approvedQuery, snap => {
+    approvedComments = snap.docs.map(d => ({id:d.id,...d.data(),likeCount:0}));
+    renderComments(); loadCommentLikes();
+  }, err => {
+    console.error("Comments could not be loaded:", err);
+    commentsList.innerHTML = '<div class="empty">Comments could not load right now. Please refresh the page later.</div>';
+  });
+}
+if (commentForm) {
+  ensureCommentUser().then(subscribeToComments).catch(err => {
+    console.error("Anonymous sign-in failed:", err);
+    commentStatus.textContent = "Comment service is unavailable. Please refresh and try again.";
+  });
+  commentForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const name = commentName.value.trim(), body = commentText.value.trim();
+    if (name.length < 2 || body.length < 2) { commentStatus.textContent = "Please enter your name and a comment."; return; }
+    const button = document.getElementById("submitComment"); button.disabled = true;
+    commentStatus.textContent = "Posting for admin review…";
+    try {
+      const user = await ensureCommentUser();
+      await addDoc(collection(db,"comments"),{name,text:body,uid:user.uid,parentId:null,status:"pending",createdAt:serverTimestamp()});
+      commentText.value = ""; commentStatus.textContent = "Submitted! Your comment will appear after admin approval.";
+    } catch(err) { console.error("Could not submit comment:",err); commentStatus.textContent = "Could not post comment. Please check connection and try again."; }
+    finally { button.disabled = false; }
+  });
+}
+async function replyToComment(parentId) {
+  const body = prompt("Write your reply (it will appear after admin approval):");
+  if (!body || body.trim().length < 2) return;
+  const name = (commentName.value.trim() || prompt("Enter your name:") || "").trim();
+  if (name.length < 2 || name.length > 40) { alert("Please enter a name between 2 and 40 characters in the comment form first."); return; }
+  try {
+    const user = await ensureCommentUser();
+    await addDoc(collection(db,"comments"),{name,text:body.trim().slice(0,1000),uid:user.uid,parentId,status:"pending",createdAt:serverTimestamp()});
+    commentStatus.textContent = "Reply submitted for admin approval.";
+  } catch(err) { console.error(err); alert("Could not submit reply. Please try again."); }
+}
+async function toggleCommentLike(commentId) {
+  try {
+    const user = await ensureCommentUser(), likeRef = doc(db,"comments",commentId,"likes",user.uid);
+    const alreadyLiked = commentLikeState.get(commentId) || false;
+    if (alreadyLiked) await deleteDoc(likeRef); else await setDoc(likeRef,{uid:user.uid,createdAt:serverTimestamp()});
+    commentLikeState.set(commentId,!alreadyLiked);
+    const item = approvedComments.find(c => c.id === commentId);
+    if (item) item.likeCount = Math.max(0,(item.likeCount||0)+(alreadyLiked?-1:1));
+    renderComments();
+  } catch(err) { console.error(err); alert("Could not update like. Please try again."); }
 }
