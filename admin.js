@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, orderBy, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, orderBy, getDocs, writeBatch, updateDoc, limit } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 import { firebaseConfig, ADMIN_EMAIL } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
@@ -16,7 +16,7 @@ document.getElementById("adminDate").textContent=todayText();
 
 onAuthStateChanged(auth,user=>{
   if(user && user.email===ADMIN_EMAIL){
-    loginView.classList.add("hidden"); dashboard.classList.remove("hidden"); loadRiders(); loadIds();
+    loginView.classList.add("hidden"); dashboard.classList.remove("hidden"); loadRiders(); loadIds(); loadComments();
   }else{
     dashboard.classList.add("hidden"); loginView.classList.remove("hidden");
   }
