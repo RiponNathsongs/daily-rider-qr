@@ -657,3 +657,138 @@ body:not(.light-mode) .stats-dropdown .mac-window-title{color:#c0d7e9 !important
 .qr-download-row{margin-top:14px}
 .qr-download-row button{width:100%}
 @media(max-width:520px){.qr-option-card{padding:12px}.qr-option-list{gap:6px}.qr-choice{padding:9px 3px;font-size:10px}.qr-option-heading h3{font-size:14px}}
+
+
+/* Theme contrast audit: keep every public, tools and admin surface readable in Light Mode */
+body.light-mode {
+  color-scheme: light;
+}
+body.light-mode .topbar,
+body.light-mode .tools-page .topbar {
+  background: rgba(255,255,255,.94);
+  border-color: rgba(22,42,66,.14);
+}
+body.light-mode .panel,
+body.light-mode .result-card,
+body.light-mode .tool-panel,
+body.light-mode .public-import,
+body.light-mode .search-wrap,
+body.light-mode .seo-info,
+body.light-mode .qr-option-card,
+body.light-mode .modal-card,
+body.light-mode .login-card,
+body.light-mode .admin-item,
+body.light-mode .about-card,
+body.light-mode .stats-popup-card,
+body.light-mode .tools-dropdown,
+body.light-mode .tools-menu-list,
+body.light-mode .tool-output {
+  color: var(--text);
+  border-color: var(--line);
+}
+body.light-mode .qr-option-card {
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 8px 24px rgba(30,55,80,.07);
+}
+body.light-mode .qr-choice {
+  background: #f4f7fb;
+  color: #172437;
+  border-color: rgba(22,42,66,.18);
+}
+body.light-mode .qr-choice:hover,
+body.light-mode .qr-choice.selected {
+  background: #e7f6fc;
+  color: #10263b;
+  border-color: #087eaa;
+}
+body.light-mode .qr-choice.selected {
+  box-shadow: 0 0 0 1px rgba(8,126,170,.16) inset;
+}
+body.light-mode .qr-option-heading h3,
+body.light-mode .qr-option-heading p,
+body.light-mode .qr-customize,
+body.light-mode .public-import strong,
+body.light-mode .tool-panel h2,
+body.light-mode .tool-panel label,
+body.light-mode .tool-description,
+body.light-mode .tools-intro h1,
+body.light-mode .tools-intro p,
+body.light-mode .hero h1,
+body.light-mode .hero p,
+body.light-mode .panel h2,
+body.light-mode .panel h3,
+body.light-mode .result-card h3,
+body.light-mode .result-card p,
+body.light-mode .result-card small,
+body.light-mode .seo-info h2,
+body.light-mode .seo-info p {
+  color: var(--text);
+}
+body.light-mode .qr-option-heading p,
+body.light-mode .public-import small,
+body.light-mode .tool-description,
+body.light-mode .tools-intro p,
+body.light-mode .hero p,
+body.light-mode .result-card small,
+body.light-mode .seo-info p {
+  color: var(--muted);
+}
+body.light-mode .search-wrap input,
+body.light-mode .public-import-row input,
+body.light-mode .form-grid input,
+body.light-mode .form-grid select,
+body.light-mode .form-grid textarea,
+body.light-mode .login-card input,
+body.light-mode .tool-panel input,
+body.light-mode .tool-panel textarea,
+body.light-mode .tool-panel select {
+  background: #fff;
+  color: #172437;
+  border-color: rgba(22,42,66,.2);
+}
+body.light-mode input::placeholder,
+body.light-mode textarea::placeholder {
+  color: #687b8e;
+  opacity: 1;
+}
+body.light-mode .primary-btn {
+  color: #071b2b;
+}
+body.light-mode .ghost-btn,
+body.light-mode .card-actions button,
+body.light-mode .zoom-row button,
+body.light-mode .theme-toggle,
+body.light-mode .tools-link,
+body.light-mode .admin-link {
+  color: #172437;
+}
+body.light-mode .card-actions button,
+body.light-mode .zoom-row button {
+  background: #edf3fa;
+}
+body.light-mode .modal {
+  background: rgba(18,35,54,.48);
+}
+body.light-mode .modal-close {
+  color: #172437;
+}
+body.light-mode .date-pill,
+body.light-mode .eyebrow {
+  color: var(--cyan);
+}
+body.light-mode .tools-dropdown .tools-menu-list a {
+  color: #172437;
+}
+body.light-mode .tools-dropdown .tools-menu-list small {
+  color: #53677d;
+}
+body.light-mode .admin-body,
+.admin-body.light-mode {
+  color-scheme: light;
+}
+@media (max-width: 760px) {
+  body.light-mode .topbar,
+  body.light-mode .tools-page .topbar {
+    background: rgba(255,255,255,.97);
+  }
+}
