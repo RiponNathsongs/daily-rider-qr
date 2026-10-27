@@ -172,6 +172,24 @@ async function loadComments() {
       date.textContent = c.createdAt && c.createdAt.toDate ? c.createdAt.toDate().toLocaleString("en-BD", {timeZone:"Asia/Dhaka"}) : "Just now";
       const actions = document.createElement("div");
       actions.className = "admin-item-actions";
+      if (!c.parentId) actions.appendChild(makeCommentButton("↩ Admin Reply", async () => {
+        const replyText = prompt("Write an official DRQR admin reply (max 1000 characters):");
+        if (!replyText || replyText.trim().length < 2) return;
+        if (replyText.trim().length > 1000) { alert("Reply must be 1000 characters or fewer."); return; }
+        const user = auth.currentUser;
+        if (!user || user.email !== ADMIN_EMAIL) { alert("Only the configured admin can send an official reply."); return; }
+        await addDoc(collection(db, "comments"), {
+          name: "DRQR Admin",
+          text: replyText.trim(),
+          uid: user.uid,
+          parentId: d.id,
+          isAdmin: true,
+          status: "pending",
+          createdAt: new Date()
+        });
+        alert("Admin reply submitted. Approve it from the moderation list to publish it.");
+        await loadComments();
+      }));
       if (c.status !== "approved") actions.appendChild(makeCommentButton("Approve", async () => { await updateDoc(doc(db, "comments", d.id), {status:"approved"}); await loadComments(); }));
       if (c.status !== "hidden") actions.appendChild(makeCommentButton("Hide", async () => { await updateDoc(doc(db, "comments", d.id), {status:"hidden"}); await loadComments(); }));
       actions.appendChild(makeCommentButton("Delete", async () => {
