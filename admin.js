@@ -57,6 +57,8 @@ document.getElementById("riderForm").onsubmit=async e=>{
 function loadIds(){
   onSnapshot(query(collection(db,"dailyIds"),where("dateKey","==",todayKey())),snap=>{
     const rows=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const countEl=document.getElementById("todayIdCount");
+    if(countEl) countEl.textContent=`(${rows.length} IDs)`;
     document.getElementById("adminIds").innerHTML=rows.map(r=>`
       <div class="admin-item">
         <div><b>${esc(r.code)}</b><small>${esc(r.riderName || "Unassigned")}</small></div>
