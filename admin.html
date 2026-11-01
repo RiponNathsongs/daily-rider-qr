@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="description" content="Private administration page for Daily Rider ID & QR.">
   <link rel="icon" type="image/svg+xml" href="favicon-admin.svg">
-  <link rel="stylesheet" href="style.css?v=20261027-adminreply1">
+  <link rel="stylesheet" href="style.css?v=20261101-idcount1">
 </head>
 <body class="admin-body">
   <div id="loginView" class="login-page">
@@ -68,7 +68,7 @@
 
         <section class="panel wide">
           <div class="panel-head">
-            <h2>Today's IDs</h2>
+            <h2>Today's IDs <span id="todayIdCount" class="today-id-count">(0 IDs)</span></h2>
             <span id="adminDate" class="date-pill"></span>
           </div>
           <div id="adminIds" class="admin-list"></div>
@@ -104,6 +104,6 @@
       }));
     })();
   </script>
-  <script type="module" src="admin.js?v=20261027-adminreply1"></script>
+  <script type="module" src="admin.js?v=20261101-idcount1"></script>
 </body>
 </html>
