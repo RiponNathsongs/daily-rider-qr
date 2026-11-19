@@ -38,21 +38,21 @@
     </section>
 
     <section class="tool-panel">
-      <h2>📁 1. Upload Excel file</h2>
-      <p class="tool-description">Supports .xlsx workbooks. Processing happens in your browser; the file is not uploaded to DRQR or Firebase.</p>
-      <label for="excelFile">Choose .xlsx file</label>
-      <input id="excelFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+      <h2>📁 1. Upload Excel or CSV file</h2>
+      <p class="tool-description">Supports .xlsx and .csv files. Processing happens in your browser; the file is not uploaded to DRQR or Firebase. CSV cannot store font styling, but its Bangla text can be repaired.</p>
+      <label for="excelFile">Choose .xlsx or .csv file</label>
+      <input id="excelFile" type="file" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv">
       <div id="fileInfo" class="tool-output" aria-live="polite"></div>
     </section>
 
     <section class="tool-panel">
-      <h2>🎯 2. Select Sheet and Cells</h2>
+      <h2>🎯 2. Select Sheet and Cells / Columns</h2>
       <div class="excel-grid">
         <div><label for="sheetSelect">Worksheet</label><select id="sheetSelect" disabled><option value="">Upload a workbook first</option></select></div>
         <div><label for="cellRange">Cell / Range</label><input id="cellRange" type="text" value="E:E" placeholder="Example: E:E or E4:E200 or E4,E7,E9" disabled></div>
       </div>
       <div class="excel-grid">
-        <div><label for="fontSelect">Font to apply to selected cells</label>
+        <div><label for="fontSelect">Font to apply (Excel only)</label>
           <select id="fontSelect">
             <option value="Aptos">Aptos</option>
             <option value="Arial">Arial</option>
@@ -86,128 +86,132 @@
         </table>
       </div>
       <div class="tool-actions">
-        <button class="primary-btn" id="downloadFixed" type="button" disabled>Download Fixed Excel</button>
+        <button class="primary-btn" id="downloadFixed" type="button" disabled>Download Fixed File</button>
       </div>
-      <p class="excel-note">Download creates a separate repaired copy. Your original file is not overwritten. Review the preview before downloading.</p>
+      <p class="excel-note">Download creates a separate repaired copy. Your original file is not overwritten. CSV keeps its text and delimiter structure; font styling is available only in XLSX. Review the preview before downloading.</p>
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
   <script>
   (() => {
     const $ = id => document.getElementById(id);
-    let workbook = null, originalName = '', changes = [];
-    const cp1252 = {128:0x20ac,130:0x201a,131:0x0192,132:0x201e,133:0x2026,134:0x2020,135:0x2021,136:0x02c6,137:0x2030,138:0x0160,139:0x2039,140:0x0152,142:0x017d,145:0x2018,146:0x2019,147:0x201c,148:0x201d,149:0x2022,150:0x2013,151:0x2014,152:0x02dc,153:0x2122,154:0x0161,155:0x203a,156:0x0153,158:0x017e,159:0x0178};
-    const reverse1252 = Object.fromEntries(Object.entries(cp1252).map(([b,cp]) => [cp,Number(b)]));
-    function recoverUtf8(text) {
-      if (!/[àÃâ][¦§€]/.test(text)) return text;
-      try {
-        const bytes = [];
-        for (const ch of text) {
-          const cp = ch.codePointAt(0);
-          if (cp <= 255) bytes.push(cp);
-          else if (reverse1252[cp] !== undefined) bytes.push(reverse1252[cp]);
-          else return text;
-        }
-        const decoded = new TextDecoder('utf-8', {fatal:true}).decode(new Uint8Array(bytes));
-        const bangla = (decoded.match(/[\u0980-\u09FF]/g) || []).length;
-        const before = (text.match(/[\u0980-\u09FF]/g) || []).length;
-        return bangla > before ? decoded : text;
-      } catch (_) { return text; }
+    let workbook=null, csvRows=null, csvDelimiter=',', fileType='', originalName='', changes=[];
+    const cp1252={128:0x20ac,130:0x201a,131:0x0192,132:0x201e,133:0x2026,134:0x2020,135:0x2021,136:0x02c6,137:0x2030,138:0x0160,139:0x2039,140:0x0152,142:0x017d,145:0x2018,146:0x2019,147:0x201c,148:0x201d,149:0x2022,150:0x2013,151:0x2014,152:0x02dc,153:0x2122,154:0x0161,155:0x203a,156:0x0153,158:0x017e,159:0x0178};
+    const reverse1252=Object.fromEntries(Object.entries(cp1252).map(([b,cp])=>[cp,Number(b)]));
+    function recoverUtf8(text){
+      if(!/[àÃâ][¦§€]/.test(text))return text;
+      try{const bytes=[];for(const ch of text){const cp=ch.codePointAt(0);if(cp<=255)bytes.push(cp);else if(reverse1252[cp]!==undefined)bytes.push(reverse1252[cp]);else return text;}
+        const decoded=new TextDecoder('utf-8',{fatal:true}).decode(new Uint8Array(bytes));
+        return (decoded.match(/[\u0980-\u09FF]/g)||[]).length>(text.match(/[\u0980-\u09FF]/g)||[]).length?decoded:text;
+      }catch(_){return text;}
     }
-    function fixEntities(text) {
-      return text.replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
-    }
-    function parseCellRef(ref, ws) {
-      const m = ref.trim().toUpperCase().match(/^([A-Z]+)([1-9][0-9]*)$/);
-      if (!m) throw new Error('Invalid cell reference: ' + ref);
-      let col = 0;
-      for (const c of m[1]) col = col * 26 + c.charCodeAt(0) - 64;
-      return {row:Number(m[2]), col};
-    }
-    function expandSelection(input, ws) {
-      const refs = new Set(), parts = input.split(',').map(s => s.trim()).filter(Boolean);
-      if (!parts.length) throw new Error('Enter a cell or range, for example E:E or E4:E200.');
-      for (const part of parts) {
-        const p = part.toUpperCase();
-        let m = p.match(/^([A-Z]+):([A-Z]+)$/);
-        if (m) {
-          const a = parseCellRef(m[1] + '1', ws).col, b = parseCellRef(m[2] + '1', ws).col;
-          for (let c=Math.min(a,b); c<=Math.max(a,b); c++) for(let r=1;r<=ws.rowCount;r++) refs.add(r+':'+c);
-          continue;
-        }
-        m = p.match(/^([A-Z]+[1-9][0-9]*):([A-Z]+[1-9][0-9]*)$/);
-        if (m) {
-          const a=parseCellRef(m[1],ws), b=parseCellRef(m[2],ws);
-          for(let r=Math.min(a.row,b.row);r<=Math.min(Math.max(a.row,b.row),ws.rowCount);r++)
-            for(let c=Math.min(a.col,b.col);c<=Math.min(Math.max(a.col,b.col),ws.columnCount);c++) refs.add(r+':'+c);
-          continue;
-        }
-        const cell = parseCellRef(p,ws); refs.add(cell.row+':'+cell.col);
+    function fixText(text){return recoverUtf8(text).replace(/&gt;/g,'>').replace(/&lt;/g,'<').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'");}
+    function parseCSV(text,delimiter){
+      const rows=[];let row=[],field='',quoted=false;
+      for(let i=0;i<text.length;i++){const ch=text[i];
+        if(quoted){if(ch==='"'&&text[i+1]==='"'){field+='"';i++;}else if(ch==='"')quoted=false;else field+=ch;}
+        else if(ch==='"'&&field==='')quoted=true;
+        else if(ch===delimiter){row.push(field);field='';}
+        else if(ch==='\n'){row.push(field.replace(/\r$/,''));rows.push(row);row=[];field='';}
+        else field+=ch;
       }
-      return [...refs].map(key => { const [row,col]=key.split(':').map(Number); return ws.getCell(row,col); });
+      row.push(field.replace(/\r$/,''));if(row.length>1||row[0]!=='')rows.push(row);
+      return rows;
     }
-    function setMessage(message, type='') { $('fixStatus').textContent=message; $('fixStatus').className='tool-output excel-status '+type; }
-    $('themeToggle').addEventListener('click', () => {
-      const light=!document.body.classList.contains('light-mode');
-      document.body.classList.toggle('light-mode',light);
-      $('themeToggle').textContent=light?'🌙 Black Mode':'☀️ White Mode';
-      try{localStorage.setItem('drqr-theme',light?'light':'dark')}catch(_){}
-    });
-    try { const light=localStorage.getItem('drqr-theme')==='light'; document.body.classList.toggle('light-mode',light); $('themeToggle').textContent=light?'🌙 Black Mode':'☀️ White Mode'; } catch(_){}
-    $('excelFile').addEventListener('change', async e => {
-      const file=e.target.files?.[0]; if(!file)return;
-      if(!/\.xlsx$/i.test(file.name)){setMessage('Please upload an .xlsx Excel workbook. CSV and legacy .xls are not supported by this tool.','error');return;}
-      try {
-        setMessage('Reading workbook…');
-        const data=await file.arrayBuffer(); workbook=new ExcelJS.Workbook(); await workbook.xlsx.load(data);
-        originalName=file.name; changes=[]; $('previewPanel').hidden=true;
-        const select=$('sheetSelect'); select.replaceChildren();
-        workbook.worksheets.forEach(ws=>{const opt=document.createElement('option');opt.value=ws.name;opt.textContent=ws.name;select.appendChild(opt)});
-        select.disabled=false; $('cellRange').disabled=false; $('previewFix').disabled=false;
-        $('clearPreview').disabled=false;
-        $('fileInfo').textContent='Loaded: '+file.name+' • '+workbook.worksheets.length+' worksheet(s). File stays in this browser.';
-        setMessage('Workbook loaded. Select the worksheet and cell range, then click Preview Fix.','success');
-      } catch(err){workbook=null;setMessage('Could not read this workbook. Please check that it is a valid, unencrypted .xlsx file. '+(err.message||''),'error');}
+    function detectDelimiter(text){
+      const first=(text.split(/\r?\n/).find(line=>line.trim())||'');
+      const candidates=[',',';','\t'];let best=',',score=-1;
+      candidates.forEach(d=>{let count=0,quoted=false;for(let i=0;i<first.length;i++){if(first[i]==='"')quoted=!quoted;else if(first[i]===d&&!quoted)count++;}if(count>score){score=count;best=d;}});
+      return best;
+    }
+    function encodeCSV(rows,delimiter){
+      return rows.map(row=>row.map(value=>{const s=String(value??'');return /["\r\n]/.test(s)||s.includes(delimiter)?'"'+s.replace(/"/g,'""')+'"':s;}).join(delimiter)).join('\r\n');
+    }
+    function colNumber(letters){let n=0;for(const c of letters)n=n*26+c.charCodeAt(0)-64;return n;}
+    function parseRef(ref){
+      const m=ref.trim().toUpperCase().match(/^([A-Z]+)([1-9][0-9]*)$/);if(!m)throw new Error('Invalid cell reference: '+ref);
+      return {row:Number(m[2]),col:colNumber(m[1])};
+    }
+    function expandCSVSelection(input,rows){
+      const selected=new Set(),parts=input.split(',').map(s=>s.trim()).filter(Boolean),maxCols=Math.max(0,...rows.map(r=>r.length));
+      if(!parts.length)throw new Error('Enter a cell/range such as E:E, E4:E200, or E4,E7.');
+      parts.forEach(part=>{
+        let m=part.toUpperCase().match(/^([A-Z]+):([A-Z]+)$/);
+        if(m){let a=colNumber(m[1]),b=colNumber(m[2]);for(let c=Math.min(a,b);c<=Math.max(a,b);c++)for(let r=1;r<=rows.length;r++)selected.add(r+':'+c);return;}
+        m=part.toUpperCase().match(/^([A-Z]+[1-9][0-9]*):([A-Z]+[1-9][0-9]*)$/);
+        if(m){const a=parseRef(m[1]),b=parseRef(m[2]);for(let r=Math.min(a.row,b.row);r<=Math.min(Math.max(a.row,b.row),rows.length);r++)for(let c=Math.min(a.col,b.col);c<=Math.min(Math.max(a.col,b.col),maxCols);c++)selected.add(r+':'+c);return;}
+        const p=parseRef(part);selected.add(p.row+':'+p.col);
+      });
+      return [...selected].map(k=>{const [row,col]=k.split(':').map(Number);return {row,col,address:colLabel(col)+row,value:rows[row-1]?.[col-1]??''};});
+    }
+    function colLabel(n){let s='';while(n){const r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26);}return s;}
+    function setMessage(message,type=''){ $('fixStatus').textContent=message;$('fixStatus').className='tool-output excel-status '+type; }
+    $('themeToggle').addEventListener('click',()=>{const light=!document.body.classList.contains('light-mode');document.body.classList.toggle('light-mode',light);$('themeToggle').textContent=light?'🌙 Black Mode':'☀️ White Mode';try{localStorage.setItem('drqr-theme',light?'light':'dark')}catch(_){}});
+    try{const light=localStorage.getItem('drqr-theme')==='light';document.body.classList.toggle('light-mode',light);$('themeToggle').textContent=light?'🌙 Black Mode':'☀️ White Mode';}catch(_){}
+    $('excelFile').addEventListener('change',async e=>{
+      const file=e.target.files?.[0];if(!file)return;
+      originalName=file.name;changes=[];workbook=null;csvRows=null;$('previewPanel').hidden=true;
+      try{
+        setMessage('Reading file…');
+        const isCSV=/\.csv$/i.test(file.name);
+        if(isCSV){
+          fileType='csv';let text=await file.text();if(text.charCodeAt(0)===0xFEFF)text=text.slice(1);
+          csvDelimiter=detectDelimiter(text);csvRows=parseCSV(text,csvDelimiter);
+          if(!csvRows.length)throw new Error('The CSV file is empty.');
+          $('sheetSelect').replaceChildren(new Option('CSV data','CSV data'));$('sheetSelect').disabled=true;
+          $('fontSelect').disabled=true;
+          $('fileInfo').textContent='Loaded: '+file.name+' • '+csvRows.length+' row(s), '+Math.max(...csvRows.map(r=>r.length))+' column(s). Delimiter: '+(csvDelimiter==='\t'?'Tab':csvDelimiter);
+          setMessage('CSV loaded. Select the column/cells containing Bangla text. CSV does not store font styling; text correction will be applied.','success');
+        }else if(/\.xlsx$/i.test(file.name)){
+          fileType='xlsx';const data=await file.arrayBuffer();workbook=new ExcelJS.Workbook();await workbook.xlsx.load(data);
+          const select=$('sheetSelect');select.replaceChildren();workbook.worksheets.forEach(ws=>select.appendChild(new Option(ws.name,ws.name)));
+          select.disabled=false;$('fontSelect').disabled=false;
+          $('fileInfo').textContent='Loaded: '+file.name+' • '+workbook.worksheets.length+' worksheet(s). File stays in this browser.';
+          setMessage('Excel workbook loaded. Select worksheet and cell range, then Preview Fix.','success');
+        }else throw new Error('Please upload an .xlsx or .csv file. Legacy .xls is not supported.');
+        $('cellRange').disabled=false;$('previewFix').disabled=false;$('clearPreview').disabled=false;
+      }catch(err){workbook=null;csvRows=null;setMessage(err.message||'Could not read this file.','error');}
     });
     $('previewFix').addEventListener('click',()=>{
-      if(!workbook)return;
-      try {
-        const ws=workbook.getWorksheet($('sheetSelect').value);
-        if(!ws)throw new Error('Please select a worksheet.');
-        const cells=expandSelection($('cellRange').value,ws), font=$('fontSelect').value, mode=$('conversionMode').value;
+      try{
         changes=[];
-        for(const cell of cells){
-          if(typeof cell.value!=='string' || !cell.value.trim())continue;
-          const before=cell.value, after=mode==='auto'?fixEntities(recoverUtf8(before)):before;
-          const shouldChange=after!==before || (cell.font?.name||'')!==font;
-          if(!shouldChange)continue;
-          changes.push({address:cell.address,before,after,font});
-        }
-        if(!changes.length){$('previewPanel').hidden=true;setMessage('No text cells needing a change were found in '+$('cellRange').value+'. Check the selected range and worksheet.','error');return;}
+        if(fileType==='csv'){
+          const cells=expandCSVSelection($('cellRange').value,csvRows);
+          cells.forEach(cell=>{if(typeof cell.value!=='string'||!cell.value.trim())return;const after=$('conversionMode').value==='auto'?fixText(cell.value):cell.value;if(after!==cell.value)changes.push({address:cell.address,before:cell.value,after,row:cell.row,col:cell.col});});
+        }else if(fileType==='xlsx'){
+          const ws=workbook.getWorksheet($('sheetSelect').value);if(!ws)throw new Error('Please select a worksheet.');
+          const input=$('cellRange').value,refs=input.split(',').map(s=>s.trim()).filter(Boolean),cells=[];
+          refs.forEach(part=>{let m=part.toUpperCase().match(/^([A-Z]+):([A-Z]+)$/);if(m){let a=colNumber(m[1]),b=colNumber(m[2]);for(let c=Math.min(a,b);c<=Math.max(a,b);c++)for(let r=1;r<=ws.rowCount;r++)cells.push(ws.getCell(r,c));return;}
+            m=part.toUpperCase().match(/^([A-Z]+[1-9][0-9]*):([A-Z]+[1-9][0-9]*)$/);if(m){const a=parseRef(m[1]),b=parseRef(m[2]);for(let r=Math.min(a.row,b.row);r<=Math.min(Math.max(a.row,b.row),ws.rowCount);r++)for(let c=Math.min(a.col,b.col);c<=Math.min(Math.max(a.col,b.col),ws.columnCount);c++)cells.push(ws.getCell(r,c));return;}
+            const p=parseRef(part);cells.push(ws.getCell(p.row,p.col));});
+          const font=$('fontSelect').value;
+          cells.forEach(cell=>{if(typeof cell.value!=='string'||!cell.value.trim())return;const after=$('conversionMode').value==='auto'?fixText(cell.value):cell.value;if(after!==cell.value||(cell.font?.name||'')!==font)changes.push({address:cell.address,before:cell.value,after,font});});
+        }else throw new Error('Upload a file first.');
+        if(!changes.length){$('previewPanel').hidden=true;setMessage('No broken Bangla text or font changes were found in the selected cells. Check the range and correction mode.','error');return;}
         const body=$('previewRows');body.replaceChildren();
-        changes.slice(0,250).forEach(item=>{
-          const tr=document.createElement('tr');
-          [item.address,item.before,item.after].forEach((value,i)=>{const td=document.createElement('td');td.textContent=value;if(i===2)td.className='fixed-cell';tr.appendChild(td)});
-          body.appendChild(tr);
-        });
+        changes.slice(0,250).forEach(item=>{const tr=document.createElement('tr');[item.address,item.before,item.after].forEach((value,i)=>{const td=document.createElement('td');td.textContent=value;if(i===2)td.className='fixed-cell';tr.appendChild(td);});body.appendChild(tr);});
         $('previewSummary').textContent=changes.length+' cell(s) will be updated. '+(changes.length>250?'Showing first 250 changes.':'');
-        $('previewPanel').hidden=false;$('downloadFixed').disabled=false;
-        setMessage('Preview ready. Check the corrected text before downloading.','success');
-      } catch(err){setMessage(err.message||'Could not create preview. Check the cell range.','error');}
+        $('previewPanel').hidden=false;$('downloadFixed').disabled=false;setMessage('Preview ready. Check the corrected text before downloading.','success');
+      }catch(err){setMessage(err.message||'Could not create preview. Check the selected range.','error');}
     });
     $('clearPreview').addEventListener('click',()=>{changes=[];$('previewRows').replaceChildren();$('previewPanel').hidden=true;$('downloadFixed').disabled=true;setMessage('Preview cleared.');});
     $('downloadFixed').addEventListener('click',async()=>{
-      if(!workbook||!changes.length)return;
+      if(!changes.length)return;
       try{
-        const ws=workbook.getWorksheet($('sheetSelect').value);
-        changes.forEach(item=>{const cell=ws.getCell(item.address);cell.value=item.after;cell.font={...(cell.font||{}),name:item.font};});
-        const buffer=await workbook.xlsx.writeBuffer();
-        const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-        const url=URL.createObjectURL(blob),a=document.createElement('a');
-        a.href=url;a.download=originalName.replace(/\.xlsx$/i,'')+'-bangla-fixed.xlsx';document.body.appendChild(a);a.click();a.remove();
-        setTimeout(()=>URL.revokeObjectURL(url),1500);
-        setMessage('Fixed Excel downloaded. Your original file remains unchanged.','success');
-      }catch(err){setMessage('Could not create the repaired workbook: '+(err.message||''),'error');}
+        let blob,downloadName;
+        if(fileType==='csv'){
+          changes.forEach(item=>{csvRows[item.row-1][item.col-1]=item.after;});
+          blob=new Blob(['\uFEFF'+encodeCSV(csvRows,csvDelimiter)],{type:'text/csv;charset=utf-8;'});
+          downloadName=originalName.replace(/\.csv$/i,'')+'-bangla-fixed.csv';
+        }else{
+          const ws=workbook.getWorksheet($('sheetSelect').value);
+          changes.forEach(item=>{const cell=ws.getCell(item.address);cell.value=item.after;if(item.font)cell.font={...(cell.font||{}),name:item.font};});
+          const buffer=await workbook.xlsx.writeBuffer();blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+          downloadName=originalName.replace(/\.xlsx$/i,'')+'-bangla-fixed.xlsx';
+        }
+        const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=downloadName;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+        setMessage('Fixed file downloaded. Your original file remains unchanged.','success');
+      }catch(err){setMessage('Could not create the repaired file: '+(err.message||''),'error');}
     });
   })();
   </script>
