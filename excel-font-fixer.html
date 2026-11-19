@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1220">
+  <title>Bangla Excel Font Fixer | DRQR</title>
+  <link rel="icon" type="image/svg+xml" href="favicon-public.svg">
+  <link rel="stylesheet" href="style.css?v=20261119-excelfixer">
+  <style>
+    .excel-fixer{width:min(980px,92%);margin:34px auto 70px}
+    .excel-fixer .tool-panel{margin:18px 0}
+    .excel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .excel-preview{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+    .excel-preview th,.excel-preview td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;overflow-wrap:anywhere}
+    .excel-preview th{color:var(--muted)}
+    .excel-preview td{max-width:360px;white-space:pre-wrap}
+    .excel-preview .fixed-cell{color:#16834b}
+    .excel-note{font-size:12px;color:var(--muted);line-height:1.65}
+    .excel-status{white-space:pre-wrap}
+    @media(max-width:620px){.excel-grid{grid-template-columns:1fr}.excel-preview{font-size:11px}.excel-preview th,.excel-preview td{padding:7px}}
+  </style>
+</head>
+<body class="tools-page">
+  <header class="topbar">
+    <div><a href="index.html" style="text-decoration:none;color:inherit"><div class="brand">DR<span>QR</span></div><div class="tagline">Helpful tools for everyday work</div></a></div>
+    <nav class="topbar-actions" aria-label="Main navigation">
+      <button id="themeToggle" class="theme-toggle" type="button">☀️ White Mode</button>
+      <a class="tools-link" href="tools.html">🧰 All Tools</a>
+      <a class="admin-link" href="index.html">Home</a>
+    </nav>
+  </header>
+  <main class="excel-fixer">
+    <section class="tools-intro">
+      <div class="eyebrow">DRQR • EXCEL UTILITY</div>
+      <h1>বাংলা Excel Font Fixer</h1>
+      <p>Upload an Excel workbook, select the cells containing broken Bangla text, preview the correction, and download a repaired copy.</p>
+    </section>
+
+    <section class="tool-panel">
+      <h2>📁 1. Upload Excel file</h2>
+      <p class="tool-description">Supports .xlsx workbooks. Processing happens in your browser; the file is not uploaded to DRQR or Firebase.</p>
+      <label for="excelFile">Choose .xlsx file</label>
+      <input id="excelFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+      <div id="fileInfo" class="tool-output" aria-live="polite"></div>
+    </section>
+
+    <section class="tool-panel">
+      <h2>🎯 2. Select Sheet and Cells</h2>
+      <div class="excel-grid">
+        <div><label for="sheetSelect">Worksheet</label><select id="sheetSelect" disabled><option value="">Upload a workbook first</option></select></div>
+        <div><label for="cellRange">Cell / Range</label><input id="cellRange" type="text" value="E:E" placeholder="Example: E:E or E4:E200 or E4,E7,E9" disabled></div>
+      </div>
+      <div class="excel-grid">
+        <div><label for="fontSelect">Font to apply to selected cells</label>
+          <select id="fontSelect">
+            <option value="Aptos">Aptos</option>
+            <option value="Arial">Arial</option>
+            <option value="Noto Sans Bengali" selected>Noto Sans Bengali</option>
+            <option value="SolaimanLipi">SolaimanLipi</option>
+            <option value="Nikosh">Nikosh</option>
+          </select>
+        </div>
+        <div><label for="conversionMode">Text correction</label>
+          <select id="conversionMode">
+            <option value="auto" selected>Auto-detect broken UTF-8 Bangla</option>
+            <option value="font-only">Font only (do not change text)</option>
+          </select>
+        </div>
+      </div>
+      <div class="tool-actions">
+        <button class="primary-btn" id="previewFix" type="button" disabled>Preview Fix</button>
+        <button id="clearPreview" type="button" disabled>Clear Preview</button>
+      </div>
+      <p class="excel-note">Examples: E:E selects the used cells in column E; E4:E200 selects a range; E4,E7,E9 selects individual cells. Multiple ranges can be separated by commas. Only text cells are processed; formulas and other cells are left unchanged.</p>
+      <div id="fixStatus" class="tool-output excel-status" aria-live="polite"></div>
+    </section>
+
+    <section class="tool-panel" id="previewPanel" hidden>
+      <h2>👀 3. Preview original and corrected text</h2>
+      <div id="previewSummary" class="tool-output"></div>
+      <div style="overflow-x:auto">
+        <table class="excel-preview">
+          <thead><tr><th>Cell</th><th>Original</th><th>Fixed preview</th></tr></thead>
+          <tbody id="previewRows"></tbody>
+        </table>
+      </div>
+      <div class="tool-actions">
+        <button class="primary-btn" id="downloadFixed" type="button" disabled>Download Fixed Excel</button>
+      </div>
+      <p class="excel-note">Download creates a separate repaired copy. Your original file is not overwritten. Review the preview before downloading.</p>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+  <script>
+  (() => {
+    const $ = id => document.getElementById(id);
+    let workbook = null, originalName = '', changes = [];
+    const cp1252 = {128:0x20ac,130:0x201a,131:0x0192,132:0x201e,133:0x2026,134:0x2020,135:0x2021,136:0x02c6,137:0x2030,138:0x0160,139:0x2039,140:0x0152,142:0x017d,145:0x2018,146:0x2019,147:0x201c,148:0x201d,149:0x2022,150:0x2013,151:0x2014,152:0x02dc,153:0x2122,154:0x0161,155:0x203a,156:0x0153,158:0x017e,159:0x0178};
+    const reverse1252 = Object.fromEntries(Object.entries(cp1252).map(([b,cp]) => [cp,Number(b)]));
+    function recoverUtf8(text) {
+      if (!/[àÃâ][¦§€]/.test(text)) return text;
+      try {
+        const bytes = [];
+        for (const ch of text) {
+          const cp = ch.codePointAt(0);
+          if (cp <= 255) bytes.push(cp);
+          else if (reverse1252[cp] !== undefined) bytes.push(reverse1252[cp]);
+          else return text;
+        }
+        const decoded = new TextDecoder('utf-8', {fatal:true}).decode(new Uint8Array(bytes));
+        const bangla = (decoded.match(/[\u0980-\u09FF]/g) || []).length;
+        const before = (text.match(/[\u0980-\u09FF]/g) || []).length;
+        return bangla > before ? decoded : text;
+      } catch (_) { return text; }
+    }
+    function fixEntities(text) {
+      return text.replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+    }
+    function parseCellRef(ref, ws) {
+      const m = ref.trim().toUpperCase().match(/^([A-Z]+)([1-9][0-9]*)$/);
+      if (!m) throw new Error('Invalid cell reference: ' + ref);
+      let col = 0;
+      for (const c of m[1]) col = col * 26 + c.charCodeAt(0) - 64;
+      return {row:Number(m[2]), col};
+    }
+    function expandSelection(input, ws) {
+      const refs = new Set(), parts = input.split(',').map(s => s.trim()).filter(Boolean);
+      if (!parts.length) throw new Error('Enter a cell or range, for example E:E or E4:E200.');
+      for (const part of parts) {
+        const p = part.toUpperCase();
+        let m = p.match(/^([A-Z]+):([A-Z]+)$/);
+        if (m) {
+          const a = parseCellRef(m[1] + '1', ws).col, b = parseCellRef(m[2] + '1', ws).col;
+          for (let c=Math.min(a,b); c<=Math.max(a,b); c++) for(let r=1;r<=ws.rowCount;r++) refs.add(r+':'+c);
+          continue;
+        }
+        m = p.match(/^([A-Z]+[1-9][0-9]*):([A-Z]+[1-9][0-9]*)$/);
+        if (m) {
+          const a=parseCellRef(m[1],ws), b=parseCellRef(m[2],ws);
+          for(let r=Math.min(a.row,b.row);r<=Math.min(Math.max(a.row,b.row),ws.rowCount);r++)
+            for(let c=Math.min(a.col,b.col);c<=Math.min(Math.max(a.col,b.col),ws.columnCount);c++) refs.add(r+':'+c);
+          continue;
+        }
+        const cell = parseCellRef(p,ws); refs.add(cell.row+':'+cell.col);
+      }
+      return [...refs].map(key => { const [row,col]=key.split(':').map(Number); return ws.getCell(row,col); });
+    }
+    function setMessage(message, type='') { $('fixStatus').textContent=message; $('fixStatus').className='tool-output excel-status '+type; }
+    $('themeToggle').addEventListener('click', () => {
+      const light=!document.body.classList.contains('light-mode');
+      document.body.classList.toggle('light-mode',light);
+      $('themeToggle').textContent=light?'🌙 Black Mode':'☀️ White Mode';
+      try{localStorage.setItem('drqr-theme',light?'light':'dark')}catch(_){}
+    });
+    try { const light=localStorage.getItem('drqr-theme')==='light'; document.body.classList.toggle('light-mode',light); $('themeToggle').textContent=light?'🌙 Black Mode':'☀️ White Mode'; } catch(_){}
+    $('excelFile').addEventListener('change', async e => {
+      const file=e.target.files?.[0]; if(!file)return;
+      if(!/\.xlsx$/i.test(file.name)){setMessage('Please upload an .xlsx Excel workbook. CSV and legacy .xls are not supported by this tool.','error');return;}
+      try {
+        setMessage('Reading workbook…');
+        const data=await file.arrayBuffer(); workbook=new ExcelJS.Workbook(); await workbook.xlsx.load(data);
+        originalName=file.name; changes=[]; $('previewPanel').hidden=true;
+        const select=$('sheetSelect'); select.replaceChildren();
+        workbook.worksheets.forEach(ws=>{const opt=document.createElement('option');opt.value=ws.name;opt.textContent=ws.name;select.appendChild(opt)});
+        select.disabled=false; $('cellRange').disabled=false; $('previewFix').disabled=false;
+        $('clearPreview').disabled=false;
+        $('fileInfo').textContent='Loaded: '+file.name+' • '+workbook.worksheets.length+' worksheet(s). File stays in this browser.';
+        setMessage('Workbook loaded. Select the worksheet and cell range, then click Preview Fix.','success');
+      } catch(err){workbook=null;setMessage('Could not read this workbook. Please check that it is a valid, unencrypted .xlsx file. '+(err.message||''),'error');}
+    });
+    $('previewFix').addEventListener('click',()=>{
+      if(!workbook)return;
+      try {
+        const ws=workbook.getWorksheet($('sheetSelect').value);
+        if(!ws)throw new Error('Please select a worksheet.');
+        const cells=expandSelection($('cellRange').value,ws), font=$('fontSelect').value, mode=$('conversionMode').value;
+        changes=[];
+        for(const cell of cells){
+          if(typeof cell.value!=='string' || !cell.value.trim())continue;
+          const before=cell.value, after=mode==='auto'?fixEntities(recoverUtf8(before)):before;
+          const shouldChange=after!==before || (cell.font?.name||'')!==font;
+          if(!shouldChange)continue;
+          changes.push({address:cell.address,before,after,font});
+        }
+        if(!changes.length){$('previewPanel').hidden=true;setMessage('No text cells needing a change were found in '+$('cellRange').value+'. Check the selected range and worksheet.','error');return;}
+        const body=$('previewRows');body.replaceChildren();
+        changes.slice(0,250).forEach(item=>{
+          const tr=document.createElement('tr');
+          [item.address,item.before,item.after].forEach((value,i)=>{const td=document.createElement('td');td.textContent=value;if(i===2)td.className='fixed-cell';tr.appendChild(td)});
+          body.appendChild(tr);
+        });
+        $('previewSummary').textContent=changes.length+' cell(s) will be updated. '+(changes.length>250?'Showing first 250 changes.':'');
+        $('previewPanel').hidden=false;$('downloadFixed').disabled=false;
+        setMessage('Preview ready. Check the corrected text before downloading.','success');
+      } catch(err){setMessage(err.message||'Could not create preview. Check the cell range.','error');}
+    });
+    $('clearPreview').addEventListener('click',()=>{changes=[];$('previewRows').replaceChildren();$('previewPanel').hidden=true;$('downloadFixed').disabled=true;setMessage('Preview cleared.');});
+    $('downloadFixed').addEventListener('click',async()=>{
+      if(!workbook||!changes.length)return;
+      try{
+        const ws=workbook.getWorksheet($('sheetSelect').value);
+        changes.forEach(item=>{const cell=ws.getCell(item.address);cell.value=item.after;cell.font={...(cell.font||{}),name:item.font};});
+        const buffer=await workbook.xlsx.writeBuffer();
+        const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+        const url=URL.createObjectURL(blob),a=document.createElement('a');
+        a.href=url;a.download=originalName.replace(/\.xlsx$/i,'')+'-bangla-fixed.xlsx';document.body.appendChild(a);a.click();a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),1500);
+        setMessage('Fixed Excel downloaded. Your original file remains unchanged.','success');
+      }catch(err){setMessage('Could not create the repaired workbook: '+(err.message||''),'error');}
+    });
+  })();
+  </script>
+</body>
+</html>
