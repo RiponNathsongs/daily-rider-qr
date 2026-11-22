@@ -62,20 +62,20 @@ document.getElementById("bulkDeleteRiderBtn").onclick=async()=>{
   button.disabled=true;
   message.textContent="Checking today's IDs...";
   try{
-    const matching=await getDocs(query(
+    const todaySnap=await getDocs(query(
       collection(db,"dailyIds"),
-      where("dateKey","==",todayKey()),
-      where("riderId","==",rider.id)
+      where("dateKey","==",todayKey())
     ));
-    if(matching.empty){ message.textContent="আজ "+rider.name+"-এর নামে কোনো ID পাওয়া যায়নি।"; return; }
-    const count=matching.size;
+    const matchingDocs=todaySnap.docs.filter(item=>item.data().riderId===rider.id);
+    if(!matchingDocs.length){ message.textContent="আজ "+rider.name+"-এর নামে কোনো ID পাওয়া যায়নি।"; return; }
+    const count=matchingDocs.length;
     if(!confirm("আপনি কি নিশ্চিত? আজ "+rider.name+"-এর নামে থাকা "+count+"টি ID স্থায়ীভাবে মুছে যাবে। Rider-টি মুছবে না।")){
       message.textContent="কোনো ID মুছে ফেলা হয়নি।";
       return;
     }
-    for(let i=0;i<matching.docs.length;i+=500){
+    for(let i=0;i<matchingDocs.length;i+=500){
       const batch=writeBatch(db);
-      matching.docs.slice(i,i+500).forEach(item=>batch.delete(item.ref));
+      matchingDocs.slice(i,i+500).forEach(item=>batch.delete(item.ref));
       await batch.commit();
     }
     message.textContent="সফলভাবে "+count+"টি ID মুছে ফেলা হয়েছে।";
