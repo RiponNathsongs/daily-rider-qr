@@ -55,6 +55,19 @@
         </section>
 
         <section class="panel">
+          <div class="panel-head"><h2>Bulk Remove Rider IDs</h2></div>
+          <p class="comments-subtitle">ভুল করে কোনো Rider-এর নামে ID যোগ হলে Rider নির্বাচন করে আজকের সেই Rider-এর সব ID একসাথে মুছে ফেলুন।</p>
+          <div class="form-grid">
+            <select id="bulkDeleteRiderSelect">
+              <option value="">Select rider</option>
+            </select>
+            <button id="bulkDeleteRiderBtn" class="danger-btn" type="button">Remove All IDs</button>
+          </div>
+          <div id="bulkDeleteRiderMessage" class="success-text" role="status"></div>
+          <small class="comments-subtitle">শুধু আজকের নির্বাচিত Rider-এর ID মুছবে। Rider account মুছবে না।</small>
+        </section>
+
+        <section class="panel">
           <div class="panel-head"><h2>Add Daily ID</h2></div>
           <form id="idForm" class="form-grid">
             <textarea id="dailyId" class="bulk-id-input" required rows="6" placeholder="Paste one or many IDs here.&#10;Example:&#10;DK061026JZ4CYV&#10;DL0610265U6U5M&#10;DB0610264G27EM"></textarea>
