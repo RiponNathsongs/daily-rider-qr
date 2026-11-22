@@ -46,15 +46,6 @@
     <main class="container">
       <div class="dashboard-grid">
         <section class="panel">
-          <div class="panel-head"><h2>Add Rider</h2></div>
-          <form id="riderForm" class="form-grid">
-            <input id="riderName" required placeholder="Rider name">
-            <button class="primary-btn" type="submit">Add Rider</button>
-          </form>
-          <div id="riderMessage" class="success-text"></div>
-        </section>
-
-        <section class="panel">
           <div class="panel-head"><h2>Bulk Remove Rider IDs</h2></div>
           <p class="comments-subtitle">ভুল করে কোনো Rider-এর নামে ID যোগ হলে Rider নির্বাচন করে আজকের সেই Rider-এর সব ID একসাথে মুছে ফেলুন।</p>
           <div class="form-grid">
@@ -77,6 +68,15 @@
             <button class="primary-btn" type="submit">Add ID + QR</button>
           </form>
           <div id="idMessage" class="success-text"></div>
+        </section>
+
+        <section class="panel rider-add-centered">
+          <div class="panel-head"><h2>Add Rider</h2></div>
+          <form id="riderForm" class="form-grid">
+            <input id="riderName" required placeholder="Rider name">
+            <button class="primary-btn" type="submit">Add Rider</button>
+          </form>
+          <div id="riderMessage" class="success-text"></div>
         </section>
 
         <section class="panel wide">
