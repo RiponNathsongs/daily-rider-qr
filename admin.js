@@ -35,8 +35,14 @@ let riders=[];
 function loadRiders(){
   onSnapshot(query(collection(db,"riders"),orderBy("name")),snap=>{
     riders=snap.docs.map(d=>({id:d.id,...d.data()}));
-    document.getElementById("riderSelect").innerHTML='<option value="">Select rider</option>'+
-      riders.filter(r=>r.active!==false).map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join("");
+    const activeRiderOptions = riders.filter(r=>r.active!==false).map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join("");
+    document.getElementById("riderSelect").innerHTML='<option value="">Select rider</option>'+activeRiderOptions;
+    const bulkSelect = document.getElementById("bulkDeleteRiderSelect");
+    if (bulkSelect) {
+      const previousValue = bulkSelect.value;
+      bulkSelect.innerHTML='<option value="">Select rider</option>'+activeRiderOptions;
+      if (riders.some(r=>r.id===previousValue && r.active!==false)) bulkSelect.value=previousValue;
+    }
     document.getElementById("riderList").innerHTML=riders.map(r=>`
       <div class="admin-item">
         <div><b>${esc(r.name)}</b><small>${r.active===false?"Inactive":"Active"}</small></div>
@@ -47,6 +53,40 @@ function loadRiders(){
     });
   });
 }
+document.getElementById("bulkDeleteRiderBtn").onclick=async()=>{
+  const select=document.getElementById("bulkDeleteRiderSelect");
+  const message=document.getElementById("bulkDeleteRiderMessage");
+  const button=document.getElementById("bulkDeleteRiderBtn");
+  const rider=riders.find(r=>r.id===select.value && r.active!==false);
+  if(!rider){ message.textContent="Please select a rider."; return; }
+  button.disabled=true;
+  message.textContent="Checking today's IDs...";
+  try{
+    const matching=await getDocs(query(
+      collection(db,"dailyIds"),
+      where("dateKey","==",todayKey()),
+      where("riderId","==",rider.id)
+    ));
+    if(matching.empty){ message.textContent="আজ "+rider.name+"-এর নামে কোনো ID পাওয়া যায়নি।"; return; }
+    const count=matching.size;
+    if(!confirm("আপনি কি নিশ্চিত? আজ "+rider.name+"-এর নামে থাকা "+count+"টি ID স্থায়ীভাবে মুছে যাবে। Rider-টি মুছবে না।")){
+      message.textContent="কোনো ID মুছে ফেলা হয়নি।";
+      return;
+    }
+    for(let i=0;i<matching.docs.length;i+=500){
+      const batch=writeBatch(db);
+      matching.docs.slice(i,i+500).forEach(item=>batch.delete(item.ref));
+      await batch.commit();
+    }
+    message.textContent="সফলভাবে "+count+"টি ID মুছে ফেলা হয়েছে।";
+  }catch(err){
+    console.error("Bulk rider ID removal error:",err);
+    message.textContent="Could not remove IDs: "+(err.code || err.message || "Unknown error");
+  }finally{
+    button.disabled=false;
+  }
+};
+
 document.getElementById("riderForm").onsubmit=async e=>{
   e.preventDefault();
   const name=document.getElementById("riderName").value.trim();
