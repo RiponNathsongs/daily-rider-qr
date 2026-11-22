@@ -844,3 +844,14 @@ body:not(.light-mode) .admin-badge{
   color:#a5f3fc;background:rgba(8,145,178,.16);
   border-color:rgba(34,211,238,.28);
 }
+
+
+/* Admin card layout: bulk remove and daily ID first, Add Rider centered below */
+.admin-body .rider-add-centered{
+  grid-column:1 / -1;
+  width:min(620px,100%);
+  justify-self:center;
+}
+@media(max-width:760px){
+  .admin-body .rider-add-centered{grid-column:auto;width:100%;}
+}
