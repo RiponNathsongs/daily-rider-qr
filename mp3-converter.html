@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Convert common audio formats to MP3 free in your browser. Batch conversion with selectable MP3 bitrate.">
+<meta name="theme-color" content="#0b1220">
+<title>Free MP3 Converter | DRQR Tools</title>
+<link rel="icon" type="image/svg+xml" href="favicon-public.svg">
+<link rel="stylesheet" href="style.css?v=20261126-mp3">
+<style>
+.mp3-wrap{width:min(900px,92%);margin:34px auto 70px}.mp3-card{padding:clamp(18px,4vw,30px);border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:var(--shadow)}.mp3-drop{display:grid;place-items:center;gap:9px;min-height:190px;padding:22px;border:2px dashed rgba(66,217,255,.45);border-radius:16px;text-align:center;background:rgba(66,217,255,.045);cursor:pointer}.mp3-drop.drag{border-color:var(--cyan);background:rgba(66,217,255,.12)}.mp3-drop strong{font-size:18px}.mp3-drop small,.mp3-note{color:var(--muted);line-height:1.6}.mp3-settings{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}.mp3-settings label{display:grid;gap:7px;color:var(--muted);font-size:13px;font-weight:700}.mp3-settings select{padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text)}.mp3-file-list{display:grid;gap:9px;margin-top:16px}.mp3-file{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;min-width:0}.mp3-file-name{min-width:0;overflow-wrap:anywhere;font-size:13px}.mp3-file a{color:var(--cyan);font-weight:800;text-decoration:none;white-space:nowrap}.mp3-progress{height:9px;border-radius:99px;background:rgba(120,140,160,.2);overflow:hidden;margin-top:14px}.mp3-progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--blue));transition:width .2s}.mp3-status{margin-top:12px;white-space:pre-wrap;color:var(--muted);font-size:13px;line-height:1.6}.mp3-status.error{color:#ff7188}.mp3-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.mp3-actions button{padding:12px 18px;border:1px solid var(--line);border-radius:11px;background:rgba(66,217,255,.1);color:var(--text);font-weight:800;cursor:pointer}.mp3-actions .primary-btn{color:#071b2b}.mp3-actions button:disabled{opacity:.5;cursor:not-allowed}@media(max-width:600px){.mp3-settings{grid-template-columns:1fr}.mp3-file{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body class="tools-page">
+<header class="topbar">
+<div><a href="index.html" style="text-decoration:none;color:inherit"><div class="brand">DR<span>QR</span></div><div class="tagline">Helpful tools for everyday work</div></a></div>
+<nav class="topbar-actions" aria-label="Main navigation">
+<button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false">☀️ White Mode</button>
+<a class="tools-link" href="tools.html">🧰 Tools</a><a class="admin-link" href="index.html">Home</a>
+</nav></header>
+<main class="mp3-wrap">
+<section class="tools-intro"><div class="eyebrow">DRQR • FREE AUDIO UTILITY</div><h1>🎵 MP3 Converter</h1><p>Convert audio files to MP3 directly in your browser. Select one file or several files and choose your preferred quality.</p></section>
+<section class="mp3-card">
+<label class="mp3-drop" id="dropZone" for="audioFiles"><span style="font-size:38px">🎧</span><strong>Choose audio files or drop them here</strong><small>Common formats: WAV, M4A, AAC, FLAC, OGG, WMA, AIFF, OPUS and more (codec/browser support may vary).</small></label>
+<input id="audioFiles" type="file" accept="audio/*,.wav,.mp3,.m4a,.aac,.flac,.ogg,.wma,.aiff,.opus,.ape" multiple hidden>
+<div class="mp3-settings">
+<label>MP3 quality<select id="bitrate"><option value="128">128 kbps — Smaller file</option><option value="192" selected>192 kbps — Balanced</option><option value="256">256 kbps — High</option><option value="320">320 kbps — Highest</option></select></label>
+<label>Output sample rate<select id="sampleRate"><option value="44100" selected>44.1 kHz — Standard</option><option value="48000">48 kHz</option></select></label>
+</div>
+<div class="mp3-actions"><button class="primary-btn" id="convertBtn" disabled>Convert to MP3</button><button id="clearBtn" disabled>Clear files</button></div>
+<div class="mp3-progress" aria-label="Conversion progress"><span id="progressBar"></span></div>
+<div id="status" class="mp3-status" role="status" aria-live="polite">Select audio files to begin. Conversion runs locally in this browser; files are not sent to DRQR or stored on a server.</div>
+<div id="fileList" class="mp3-file-list"></div>
+</section>
+<p class="mp3-note">Note: FFmpeg loads the audio conversion engine the first time you use this tool, so an internet connection is required. Very large files may use significant device memory. Some protected, damaged or uncommon codecs may not convert.</p>
+<p class="tools-footer"><a href="tools.html">← Back to all DRQR tools</a></p>
+</main>
+<script>
+(()=> {
+const $=id=>document.getElementById(id), input=$('audioFiles'), drop=$('dropZone'), convert=$('convertBtn'), clear=$('clearBtn'), status=$('status'), list=$('fileList'), bar=$('progressBar');
+let files=[], outputs=[], ffmpeg=null, loading=null, busy=false;
+const fmt=n=>n<1024*1024?(n/1024).toFixed(1)+' KB':(n/1024/1024).toFixed(2)+' MB';
+function say(msg,error=false){status.textContent=msg;status.classList.toggle('error',error)}
+function render(){list.replaceChildren();files.forEach((f,i)=>{const row=document.createElement('div');row.className='mp3-file';const name=document.createElement('span');name.className='mp3-file-name';name.textContent=f.name+' • '+fmt(f.size);row.append(name);const out=outputs[i];if(out){const a=document.createElement('a');a.href=out.url;a.download=out.name;a.textContent='Download MP3';row.append(a)}list.append(row)});convert.disabled=!files.length||busy;clear.disabled=!files.length||busy}
+function addFiles(incoming){const audio=[...incoming].filter(f=>f.type.startsWith('audio/')||/\.(wav|mp3|m4a|aac|flac|ogg|wma|aiff|aif|opus|ape|mp4|webm)$/i.test(f.name));if(!audio.length){say('No supported audio file was selected.',true);return}files=[...files,...audio];outputs.forEach(o=>o&&URL.revokeObjectURL(o.url));outputs=[];bar.style.width='0%';render();say(files.length+' audio file(s) ready. Choose Convert to MP3.')}
+input.addEventListener('change',e=>{addFiles(e.target.files);input.value=''});
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')}));
+drop.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+$('clearBtn').addEventListener('click',()=>{outputs.forEach(o=>o&&URL.revokeObjectURL(o.url));files=[];outputs=[];bar.style.width='0%';render();say('File list cleared.')});
+async function engine(){if(ffmpeg)return ffmpeg;if(loading)return loading;loading=(async()=>{say('Loading FFmpeg engine… Please wait.');const {FFmpeg}=await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');const {toBlobURL}=await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js');const f=new FFmpeg();f.on('log',({message})=>{if(/error/i.test(message))say(message,true)});await f.load({coreURL:await toBlobURL('https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js','text/javascript'),wasmURL:await toBlobURL('https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm','application/wasm')});ffmpeg=f;return f})();try{return await loading}catch(e){loading=null;throw e}}
+convert.addEventListener('click',async()=>{if(busy||!files.length)return;busy=true;render();try{const f=await engine();for(let i=0;i<files.length;i++){const file=files[i],ext=(file.name.split('.').pop()||'audio').toLowerCase().replace(/[^a-z0-9]/g,'')||'audio',inputName='input_'+i+'.'+ext,outputName='drqr_'+i+'.mp3';say('Converting '+(i+1)+' of '+files.length+': '+file.name);await f.writeFile(inputName,new Uint8Array(await file.arrayBuffer()));const code=await f.exec(['-i',inputName,'-vn','-codec:a','libmp3lame','-b:a',$('bitrate').value+'k','-ar',$('sampleRate').value,'-y',outputName]);if(code!==0)throw new Error('Could not convert '+file.name+'. The audio codec may not be supported.');const data=await f.readFile(outputName);const blob=new Blob([data.buffer],{type:'audio/mpeg'});const url=URL.createObjectURL(blob);const base=file.name.replace(/\.[^.]+$/,'').replace(/[\\/:*?"<>|]/g,'_')||'audio';outputs[i]={url,name:base+'.mp3'};await f.deleteFile(inputName);await f.deleteFile(outputName);bar.style.width=Math.round((i+1)/files.length*100)+'%';render()}say('Done! '+outputs.length+' MP3 file(s) converted. Use Download MP3 beside each file.')}catch(e){say('Conversion failed: '+(e&&e.message?e.message:String(e)),true)}finally{busy=false;render()}});
+const theme=document.getElementById('themeToggle');if(theme){const apply=()=>{const light=localStorage.getItem('drqr-theme')==='light';document.body.classList.toggle('light-mode',light);theme.textContent=light?'🌙 Dark Mode':'☀️ White Mode';theme.setAttribute('aria-pressed',String(light))};apply();theme.addEventListener('click',()=>{localStorage.setItem('drqr-theme',document.body.classList.contains('light-mode')?'dark':'light');apply()})}
+})();
+</script>
+</body></html>
